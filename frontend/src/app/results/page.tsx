@@ -23,6 +23,12 @@ export default function ResultsPage() {
     rent_cap_pct: parseFloat(searchParams.get('rent_cap_pct') || '0.3'),
     population_min: parseInt(searchParams.get('population_min') || '0'),
     limit: parseInt(searchParams.get('limit') || '50'),
+    affordability_weight: parseFloat(searchParams.get('affordability_weight') || '10'),
+    schools_weight: parseFloat(searchParams.get('schools_weight') || '5'),
+    safety_weight: parseFloat(searchParams.get('safety_weight') || '8'),
+    weather_weight: parseFloat(searchParams.get('weather_weight') || '5'),
+    healthcare_weight: parseFloat(searchParams.get('healthcare_weight') || '6'),
+    walkability_weight: parseFloat(searchParams.get('walkability_weight') || '3'),
   };
 
   // Fetch rankings

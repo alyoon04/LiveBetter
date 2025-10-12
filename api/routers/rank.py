@@ -9,9 +9,9 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from models import RankRequest, RankResponse, ResultMetro, Essentials, Coords
+from models import RankRequest, RankResponse, ResultMetro, Essentials, Coords, QualityOfLife
 from db import db
-from scoring import calculate_metro_affordability
+from scoring import calculate_metro_affordability, calculate_qol_scores, calculate_composite_score
 
 router = APIRouter()
 
@@ -38,12 +38,22 @@ def rank_metros(req: RankRequest):
                 detail="No metros found matching the criteria"
             )
 
-        # Calculate affordability for each metro
+        # Calculate affordability and composite scores for each metro
         results: List[ResultMetro] = []
+
+        # Build user preference weights dictionary
+        weights = {
+            "affordability_weight": req.affordability_weight,
+            "schools_weight": req.schools_weight,
+            "safety_weight": req.safety_weight,
+            "weather_weight": req.weather_weight,
+            "healthcare_weight": req.healthcare_weight,
+            "walkability_weight": req.walkability_weight,
+        }
 
         for metro in metros:
             try:
-                # Calculate all metrics
+                # Calculate affordability metrics
                 metrics = calculate_metro_affordability(
                     salary=req.salary,
                     family_size=req.family_size,
@@ -54,18 +64,54 @@ def rank_metros(req: RankRequest):
                     rpp_index=float(metro.rpp_index)
                 )
 
+                affordability_score = metrics["score"]
+
+                # Extract QOL data from metro (convert Decimals to float)
+                qol_data = {
+                    "school_score": float(metro.school_score) if metro.school_score is not None else None,
+                    "crime_rate": float(metro.crime_rate) if metro.crime_rate is not None else None,
+                    "weather_score": float(metro.weather_score) if metro.weather_score is not None else None,
+                    "healthcare_score": float(metro.healthcare_score) if metro.healthcare_score is not None else None,
+                    "walkability_score": float(metro.walkability_score) if metro.walkability_score is not None else None,
+                }
+
+                # Calculate normalized QOL scores
+                qol_scores = calculate_qol_scores(qol_data)
+
+                # Calculate composite score
+                composite_score = calculate_composite_score(
+                    affordability_score=affordability_score,
+                    qol_scores=qol_scores,
+                    weights=weights
+                )
+
+                # Build QualityOfLife object if data exists
+                quality_of_life = None
+                if any(v is not None for v in qol_data.values()):
+                    quality_of_life = QualityOfLife(
+                        school_score=metro.school_score,
+                        crime_rate=metro.crime_rate,
+                        weather_score=metro.weather_score,
+                        healthcare_score=metro.healthcare_score,
+                        walkability_score=metro.walkability_score,
+                        air_quality_index=metro.air_quality_index,
+                        commute_time_mins=metro.commute_time_mins
+                    )
+
                 # Build result object
                 result = ResultMetro(
                     metro_id=metro.metro_id,
                     name=metro.name,
                     state=metro.state,
-                    score=metrics["score"],
+                    score=composite_score,  # Overall composite score
+                    affordability_score=affordability_score,  # Just affordability component
                     discretionary_income=metrics["discretionary_income"],
                     essentials=Essentials(**metrics["essentials"]),
                     net_monthly_adjusted=metrics["net_monthly_adjusted"],
                     rpp_index=float(metro.rpp_index),
                     population=metro.population,
-                    coords=Coords(lat=metro.lat, lon=metro.lon)
+                    coords=Coords(lat=metro.lat, lon=metro.lon),
+                    quality_of_life=quality_of_life
                 )
                 results.append(result)
 

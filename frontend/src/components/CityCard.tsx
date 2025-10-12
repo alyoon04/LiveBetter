@@ -85,6 +85,68 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
         </div>
       </div>
 
+      {/* Quality of Life Badges */}
+      {metro.quality_of_life && (
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-2">
+            {metro.quality_of_life.school_score !== undefined && (
+              <div className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full text-xs">
+                <span>📚</span>
+                <span className="text-gray-700 dark:text-gray-300">Schools:</span>
+                <span className="font-bold text-blue-700 dark:text-blue-300">
+                  {metro.quality_of_life.school_score.toFixed(0)}
+                </span>
+              </div>
+            )}
+            {metro.quality_of_life.crime_rate !== undefined && (
+              <div className="inline-flex items-center gap-1.5 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-full text-xs">
+                <span>🛡️</span>
+                <span className="text-gray-700 dark:text-gray-300">Crime:</span>
+                <span className="font-bold text-green-700 dark:text-green-300">
+                  {metro.quality_of_life.crime_rate.toFixed(0)}/100k
+                </span>
+              </div>
+            )}
+            {metro.quality_of_life.weather_score !== undefined && (
+              <div className="inline-flex items-center gap-1.5 bg-yellow-50 dark:bg-yellow-900/30 px-3 py-1.5 rounded-full text-xs">
+                <span>☀️</span>
+                <span className="text-gray-700 dark:text-gray-300">Weather:</span>
+                <span className="font-bold text-yellow-700 dark:text-yellow-300">
+                  {metro.quality_of_life.weather_score.toFixed(0)}
+                </span>
+              </div>
+            )}
+            {metro.quality_of_life.healthcare_score !== undefined && (
+              <div className="inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-900/30 px-3 py-1.5 rounded-full text-xs">
+                <span>🏥</span>
+                <span className="text-gray-700 dark:text-gray-300">Healthcare:</span>
+                <span className="font-bold text-red-700 dark:text-red-300">
+                  {metro.quality_of_life.healthcare_score.toFixed(0)}
+                </span>
+              </div>
+            )}
+            {metro.quality_of_life.walkability_score !== undefined && (
+              <div className="inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-900/30 px-3 py-1.5 rounded-full text-xs">
+                <span>🚶</span>
+                <span className="text-gray-700 dark:text-gray-300">Walkability:</span>
+                <span className="font-bold text-purple-700 dark:text-purple-300">
+                  {metro.quality_of_life.walkability_score.toFixed(0)}
+                </span>
+              </div>
+            )}
+            {metro.quality_of_life.commute_time_mins !== undefined && (
+              <div className="inline-flex items-center gap-1.5 bg-orange-50 dark:bg-orange-900/30 px-3 py-1.5 rounded-full text-xs">
+                <span>🚗</span>
+                <span className="text-gray-700 dark:text-gray-300">Commute:</span>
+                <span className="font-bold text-orange-700 dark:text-orange-300">
+                  {metro.quality_of_life.commute_time_mins.toFixed(0)}m
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Expand/Collapse Button */}
       <button
         onClick={() => setExpanded(!expanded)}

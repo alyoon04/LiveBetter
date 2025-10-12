@@ -29,7 +29,7 @@ def get_db_connection():
 
 
 class MetroRow:
-    """Data class for metro with costs"""
+    """Data class for metro with costs and quality of life data"""
     def __init__(self, row: dict):
         self.metro_id = row['metro_id']
         self.name = row['name']
@@ -42,6 +42,15 @@ class MetroRow:
         self.rpp_index = row['rpp_index']
         self.eff_tax_rate = row['eff_tax_rate']
         self.utilities_monthly = row['utilities_monthly']
+
+        # Quality of life metrics (may be None)
+        self.school_score = row.get('school_score')
+        self.crime_rate = row.get('crime_rate')
+        self.weather_score = row.get('weather_score')
+        self.healthcare_score = row.get('healthcare_score')
+        self.walkability_score = row.get('walkability_score')
+        self.air_quality_index = row.get('air_quality_index')
+        self.commute_time_mins = row.get('commute_time_mins')
 
 
 class Database:
@@ -84,9 +93,17 @@ class Database:
                     mc.median_rent_usd,
                     mc.rpp_index,
                     mc.eff_tax_rate,
-                    mc.utilities_monthly
+                    mc.utilities_monthly,
+                    qol.school_score,
+                    qol.crime_rate,
+                    qol.weather_score,
+                    qol.healthcare_score,
+                    qol.walkability_score,
+                    qol.air_quality_index,
+                    qol.commute_time_mins
                 FROM metro m
                 INNER JOIN metro_costs mc ON m.metro_id = mc.metro_id
+                LEFT JOIN metro_quality_of_life qol ON m.metro_id = qol.metro_id
                 WHERE m.population >= %s
             """
             params = [population_min]

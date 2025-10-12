@@ -116,3 +116,111 @@ def validate_inputs(salary: float, family_size: int, rent_cap_pct: float):
         raise ValueError("family_size must be >= 1")
     if rent_cap_pct < 0.1 or rent_cap_pct > 0.6:
         raise ValueError("rent_cap_pct must be between 0.1 and 0.6")
+
+
+def normalize_qol_metric(value: float, min_val: float, max_val: float, inverse: bool = False) -> float:
+    """
+    Normalize a quality of life metric to 0-1 scale.
+
+    Args:
+        value: The raw metric value
+        min_val: Minimum expected value
+        max_val: Maximum expected value
+        inverse: If True, lower values are better (e.g., crime rate)
+
+    Returns:
+        Normalized score between 0 and 1
+    """
+    if value is None:
+        return 0.5  # Neutral score if data missing
+
+    # Convert to float if it's a Decimal (from PostgreSQL)
+    value = float(value)
+
+    # Clamp value to range
+    clamped = max(min_val, min(max_val, value))
+
+    # Normalize to 0-1
+    if max_val == min_val:
+        normalized = 0.5
+    else:
+        normalized = (clamped - min_val) / (max_val - min_val)
+
+    # Invert if lower is better
+    if inverse:
+        normalized = 1.0 - normalized
+
+    return normalized
+
+
+def calculate_qol_scores(qol_data: dict) -> dict:
+    """
+    Calculate normalized QOL component scores.
+
+    Args:
+        qol_data: Dictionary with raw QOL metrics
+
+    Returns:
+        Dictionary with normalized scores (0-1)
+    """
+    if not qol_data:
+        return {}
+
+    return {
+        "school_score": normalize_qol_metric(qol_data.get("school_score"), 0, 100, inverse=False),
+        "safety_score": normalize_qol_metric(qol_data.get("crime_rate"), 200, 800, inverse=True),  # Lower crime is better
+        "weather_score": normalize_qol_metric(qol_data.get("weather_score"), 0, 100, inverse=False),
+        "healthcare_score": normalize_qol_metric(qol_data.get("healthcare_score"), 0, 100, inverse=False),
+        "walkability_score": normalize_qol_metric(qol_data.get("walkability_score"), 0, 100, inverse=False),
+    }
+
+
+def calculate_composite_score(
+    affordability_score: float,
+    qol_scores: dict,
+    weights: dict
+) -> float:
+    """
+    Calculate weighted composite score from affordability and QOL metrics.
+
+    Args:
+        affordability_score: Affordability component score (0-1)
+        qol_scores: Dictionary with normalized QOL scores
+        weights: Dictionary with user preference weights
+
+    Returns:
+        Weighted composite score (0-1)
+    """
+    # Extract weights with defaults
+    w_affordability = weights.get("affordability_weight", 10)
+    w_schools = weights.get("schools_weight", 5)
+    w_safety = weights.get("safety_weight", 8)
+    w_weather = weights.get("weather_weight", 5)
+    w_healthcare = weights.get("healthcare_weight", 6)
+    w_walkability = weights.get("walkability_weight", 3)
+
+    # Calculate total weight for normalization
+    total_weight = (
+        w_affordability + w_schools + w_safety +
+        w_weather + w_healthcare + w_walkability
+    )
+
+    # If no QOL data available, return just affordability score
+    if not qol_scores:
+        return affordability_score
+
+    # Calculate weighted sum
+    weighted_sum = (
+        affordability_score * w_affordability +
+        qol_scores.get("school_score", 0.5) * w_schools +
+        qol_scores.get("safety_score", 0.5) * w_safety +
+        qol_scores.get("weather_score", 0.5) * w_weather +
+        qol_scores.get("healthcare_score", 0.5) * w_healthcare +
+        qol_scores.get("walkability_score", 0.5) * w_walkability
+    )
+
+    # Normalize by total weight
+    if total_weight > 0:
+        return weighted_sum / total_weight
+    else:
+        return affordability_score

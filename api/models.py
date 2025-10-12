@@ -12,6 +12,14 @@ class RankRequest(BaseModel):
     population_min: int = Field(ge=0, default=0, description="Minimum metro population filter")
     limit: int = Field(ge=1, le=200, default=50, description="Maximum number of results to return")
 
+    # Preference weights (0-10 scale, will be normalized)
+    affordability_weight: float = Field(ge=0, le=10, default=10, description="How much you value affordability")
+    schools_weight: float = Field(ge=0, le=10, default=5, description="How much you value school quality")
+    safety_weight: float = Field(ge=0, le=10, default=8, description="How much you value low crime rates")
+    weather_weight: float = Field(ge=0, le=10, default=5, description="How much you value good weather")
+    healthcare_weight: float = Field(ge=0, le=10, default=6, description="How much you value healthcare quality")
+    walkability_weight: float = Field(ge=0, le=10, default=3, description="How much you value walkability")
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -19,7 +27,13 @@ class RankRequest(BaseModel):
                 "family_size": 2,
                 "rent_cap_pct": 0.3,
                 "population_min": 100000,
-                "limit": 50
+                "limit": 50,
+                "affordability_weight": 10,
+                "schools_weight": 5,
+                "safety_weight": 8,
+                "weather_weight": 5,
+                "healthcare_weight": 6,
+                "walkability_weight": 3
             }
         }
 
@@ -35,18 +49,30 @@ class Coords(BaseModel):
     lat: float
     lon: float
 
+class QualityOfLife(BaseModel):
+    """Quality of life metrics for a metro"""
+    school_score: Optional[float] = Field(None, description="School quality score 0-100, higher is better")
+    crime_rate: Optional[float] = Field(None, description="Violent crimes per 100k population, lower is better")
+    weather_score: Optional[float] = Field(None, description="Weather desirability 0-100, higher is better")
+    healthcare_score: Optional[float] = Field(None, description="Healthcare quality 0-100, higher is better")
+    walkability_score: Optional[float] = Field(None, description="Walkability index 0-100, higher is better")
+    air_quality_index: Optional[float] = Field(None, description="EPA Air Quality Index 0-500, lower is better")
+    commute_time_mins: Optional[float] = Field(None, description="Average commute time in minutes")
+
 class ResultMetro(BaseModel):
     """Single metro result with affordability score and cost breakdown"""
     metro_id: int
     name: str
     state: str
-    score: float = Field(description="Affordability score (0-1), higher is better")
+    score: float = Field(description="Overall composite score (0-1), higher is better")
+    affordability_score: float = Field(description="Affordability component (0-1), higher is better")
     discretionary_income: float = Field(description="Monthly discretionary income after essentials")
     essentials: Essentials
     net_monthly_adjusted: float = Field(description="Monthly net income adjusted for regional price parity")
     rpp_index: float = Field(description="Regional Price Parity index (1.0 = national average)")
     population: Optional[int] = None
     coords: Coords
+    quality_of_life: Optional[QualityOfLife] = None
 
 class RankResponse(BaseModel):
     """Response model for /rank endpoint"""
