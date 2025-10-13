@@ -48,6 +48,12 @@ yarn-error.log*
 *.sqlite
 *.sqlite3
 
+# Data files (users must download themselves)
+data/zillow_rent_metro.csv
+data/bea_marpp_sample.json
+.api_cache/
+
 # Misc
 .vercel
 .turbo
+/tmp/
