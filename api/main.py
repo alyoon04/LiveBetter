@@ -26,7 +26,7 @@ Affordability is calculated based on:
 1. After-tax income adjusted for regional price parity
 2. Essential monthly costs (rent, utilities, groceries, transport)
 3. Discretionary income (income minus essentials)
-4. Sigmoid scoring function centered at $1,500 discretionary income
+4. Linear score normalization from -$500 to $6,000 discretionary income
 """
 
 # Create FastAPI app

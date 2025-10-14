@@ -29,11 +29,11 @@ export default function MethodologyPage() {
               <div>2. Adjusted Income = Net Monthly / RPP Index</div>
               <div>3. Essentials = Rent + Utilities + Groceries + Transport</div>
               <div>4. Discretionary Income = Adjusted Income - Essentials</div>
-              <div>5. Score = 1 / (1 + e^(-(DI - 1500) / 400))</div>
+              <div>5. Score = (DI - Min) / (Max - Min)</div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              The sigmoid function centers around $1,500 discretionary income, with a score of 0.5
-              at that point. Higher scores indicate more affordable cities.
+              Scores are linearly normalized based on discretionary income, where -$500/month scores 0%
+              and $6,000/month scores 100%. This provides clear differentiation between cities.
             </p>
           </section>
 

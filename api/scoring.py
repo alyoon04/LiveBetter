@@ -10,9 +10,10 @@ GROCERIES_PER_ADDITIONAL = 150.0  # Additional per person
 TRANSPORT_BASE_SINGLE = 250.0  # Base transport for 1 person
 TRANSPORT_PER_ADDITIONAL = 75.0  # Additional per person
 
-# Sigmoid parameters for affordability score
-SIGMOID_CENTER = 1500.0  # Discretionary income at which score = 0.5
-SIGMOID_SLOPE = 400.0  # Controls steepness of the curve
+# Score normalization parameters
+# These define the range for linear normalization
+MIN_DI_FOR_SCORING = -500.0  # Cities with DI below this get score near 0
+MAX_DI_FOR_SCORING = 6000.0  # Cities with DI above this get score near 1
 
 
 def base_groceries(family_size: int) -> float:
@@ -31,10 +32,11 @@ def base_transport(family_size: int) -> float:
 
 def affordability_score(discretionary_income: float) -> float:
     """
-    Calculate affordability score using sigmoid function.
+    Calculate affordability score using linear normalization.
 
     Score ranges from 0 (unaffordable) to 1 (very affordable).
-    Center point at $1,500 discretionary income yields score of 0.5.
+    Linear mapping between MIN_DI_FOR_SCORING and MAX_DI_FOR_SCORING provides
+    better spread and shows real differences between cities.
 
     Args:
         discretionary_income: Monthly discretionary income after essentials
@@ -42,8 +44,15 @@ def affordability_score(discretionary_income: float) -> float:
     Returns:
         Score between 0 and 1
     """
-    exponent = -(discretionary_income - SIGMOID_CENTER) / SIGMOID_SLOPE
-    return 1.0 / (1.0 + math.exp(exponent))
+    # Linear normalization between min and max thresholds
+    if discretionary_income <= MIN_DI_FOR_SCORING:
+        return 0.0
+    elif discretionary_income >= MAX_DI_FOR_SCORING:
+        return 1.0
+    else:
+        # Linear interpolation
+        range_di = MAX_DI_FOR_SCORING - MIN_DI_FOR_SCORING
+        return (discretionary_income - MIN_DI_FOR_SCORING) / range_di
 
 
 def calculate_metro_affordability(

@@ -35,7 +35,7 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-200 p-6 border border-gray-100 dark:border-gray-700 transform hover:-translate-y-1"
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 p-6 border border-gray-100 dark:border-gray-700 transform hover:-translate-y-2 hover:scale-[1.02] cursor-pointer"
       onMouseEnter={() => onHover?.(metro)}
       onMouseLeave={() => onHover?.(null)}
     >
@@ -65,19 +65,19 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
 
       {/* Key Stats Row */}
       <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105">
           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Rent</div>
           <div className="font-bold font-mono text-gray-900 dark:text-gray-100">
             {formatCurrency(metro.essentials.rent)}
           </div>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105">
           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">DI/mo</div>
           <div className="font-bold font-mono text-gray-900 dark:text-gray-100">
             {formatCurrency(metro.discretionary_income)}
           </div>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105">
           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">RPP</div>
           <div className="font-bold font-mono text-gray-900 dark:text-gray-100">
             {metro.rpp_index.toFixed(2)}
@@ -88,11 +88,11 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
       {/* Expand/Collapse Button */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-all hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg py-2"
       >
         {expanded ? 'Hide' : 'Show'} breakdown
         <svg
-          className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
 
       {/* Expanded Breakdown */}
       {expanded && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">Rent</span>
