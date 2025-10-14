@@ -88,6 +88,16 @@ export default function MethodologyPage() {
                   Single: $350 groceries + $250 transport. Each additional person: +$150 groceries, +$75 transport.
                 </p>
               </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  Population (U.S. Census Bureau)
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Metropolitan Statistical Area (MSA) population data from official U.S. Census Bureau estimates.
+                  MSA populations include the entire metro region (city plus surrounding suburbs and counties),
+                  reflecting the actual labor market and cost-of-living area where people live and work.
+                </p>
+              </div>
             </div>
           </section>
 

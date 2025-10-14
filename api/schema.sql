@@ -14,6 +14,8 @@ CREATE TABLE metro (
   lat DOUBLE PRECISION,
   lon DOUBLE PRECISION,
   population INT,
+  population_source TEXT,                    -- Source of population data: 'wikipedia', 'census_pep', 'census_acs', 'manual'
+  population_updated_at TIMESTAMP,           -- When the population data was last updated
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

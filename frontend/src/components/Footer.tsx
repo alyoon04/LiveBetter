@@ -11,20 +11,6 @@ export function Footer() {
             >
               Methodology
             </a>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="mailto:feedback@livebetter.com"
-              className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Feedback
-            </a>
           </div>
         </div>
       </div>
