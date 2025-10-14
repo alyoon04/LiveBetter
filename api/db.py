@@ -9,13 +9,22 @@ from contextlib import contextmanager
 
 # Database configuration from environment
 import getpass
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "livebetter"),
-    "user": os.getenv("DB_USER", getpass.getuser()),
-    "password": os.getenv("DB_PASSWORD", "")
-}
+
+# Support both DATABASE_URL and individual env vars
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    # Parse DATABASE_URL for psycopg2
+    DB_CONFIG = {"dsn": DATABASE_URL}
+else:
+    # Fall back to individual environment variables
+    DB_CONFIG = {
+        "host": os.getenv("DB_HOST", "localhost"),
+        "port": int(os.getenv("DB_PORT", 5432)),
+        "database": os.getenv("DB_NAME", "livebetter"),
+        "user": os.getenv("DB_USER", getpass.getuser()),
+        "password": os.getenv("DB_PASSWORD", "")
+    }
 
 
 @contextmanager
