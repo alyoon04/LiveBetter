@@ -1,14 +1,16 @@
+'use client';
+
 export default function MethodologyPage() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8 animate-fade-in">
           Methodology
         </h1>
 
         <div className="space-y-8 bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-card">
           {/* Overview */}
-          <section>
+          <section className="animate-slide-down" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               How We Calculate Affordability
             </h2>
@@ -20,7 +22,7 @@ export default function MethodologyPage() {
           </section>
 
           {/* Formula */}
-          <section>
+          <section className="animate-slide-down" style={{ animationDelay: '0.4s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Affordability Score Formula
             </h3>
@@ -38,7 +40,7 @@ export default function MethodologyPage() {
           </section>
 
           {/* Data Sources */}
-          <section>
+          <section className="animate-slide-down" style={{ animationDelay: '0.6s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Data Sources
             </h3>
@@ -102,7 +104,7 @@ export default function MethodologyPage() {
           </section>
 
           {/* Limitations */}
-          <section>
+          <section className="animate-slide-down" style={{ animationDelay: '0.8s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Limitations & Disclaimers
             </h3>
@@ -118,7 +120,7 @@ export default function MethodologyPage() {
           </section>
 
           {/* Future Improvements */}
-          <section>
+          <section className="animate-slide-down" style={{ animationDelay: '1.0s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Planned Enhancements
             </h3>
@@ -147,7 +149,7 @@ export default function MethodologyPage() {
           </section>
 
           {/* Example Calculation */}
-          <section>
+          <section className="animate-slide-down" style={{ animationDelay: '1.2s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Example Calculation
             </h3>
@@ -169,6 +171,38 @@ export default function MethodologyPage() {
           </section>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        .animate-slide-down {
+          opacity: 0;
+          animation: slideDown 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in {
+          opacity: 0;
+          animation: fadeIn 0.6s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

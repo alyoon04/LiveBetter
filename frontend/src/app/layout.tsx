@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'LiveBetter - Find Your Perfect City',
   description: 'Discover the most affordable U.S. cities based on your salary and lifestyle preferences.',
   keywords: ['cost of living', 'affordability', 'city rankings', 'relocation', 'salary comparison'],
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
