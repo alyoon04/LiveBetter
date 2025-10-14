@@ -76,8 +76,12 @@ export function FormCard() {
             <input
               type="number"
               id="salary"
-              value={formData.salary}
-              onChange={(e) => setFormData({ ...formData, salary: parseInt(e.target.value) || 0 })}
+              value={formData.salary === 0 ? '' : formData.salary}
+              onChange={(e) => {
+                const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                setFormData({ ...formData, salary: value });
+              }}
+              onFocus={(e) => e.target.select()}
               className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500"
               placeholder="90000"
               min="10000"
