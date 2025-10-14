@@ -2,14 +2,14 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { rankMetros } from '@/lib/api';
 import type { Metro, SortField, SortDirection, RankRequest } from '@/types';
 import { CityCard } from '@/components/CityCard';
 import { MapView } from '@/components/MapView';
 import Link from 'next/link';
 
-export default function ResultsPage() {
+function ResultsContent() {
   const searchParams = useSearchParams();
   const [hoveredMetro, setHoveredMetro] = useState<Metro | null>(null);
   const [sortField, setSortField] = useState<SortField>('score');
@@ -84,10 +84,21 @@ export default function ResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Finding the best cities for you...</p>
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-2 border-primary-400 opacity-20"></div>
+            <div className="relative animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-primary-600"></div>
+          </div>
+          <div className="space-y-2 animate-in fade-in duration-700">
+            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">Finding the best cities for you</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Analyzing cost of living data...</p>
+          </div>
+          <div className="mt-6 flex justify-center gap-2">
+            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
         </div>
       </div>
     );
@@ -118,7 +129,7 @@ export default function ResultsPage() {
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -131,14 +142,14 @@ export default function ResultsPage() {
             </div>
             <Link
               href="/"
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all hover:scale-105 text-gray-700 dark:text-gray-300"
             >
               Refine Search
             </Link>
           </div>
 
           {/* Sort Controls */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-500 delay-100">
             <span className="text-sm text-gray-600 dark:text-gray-400 py-2">Sort by:</span>
             {[
               { field: 'score' as SortField, label: 'Affordability' },
@@ -149,21 +160,21 @@ export default function ResultsPage() {
               <button
                 key={field}
                 onClick={() => handleSort(field)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95 ${
                   sortField === field
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-primary-600 text-white shadow-lg'
                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 {label}
                 {sortField === field && (
-                  <span className="ml-1">{sortDirection === 'desc' ? '↓' : '↑'}</span>
+                  <span className="ml-1 inline-block transition-transform">{sortDirection === 'desc' ? '↓' : '↑'}</span>
                 )}
               </button>
             ))}
             <button
               onClick={() => setShowMap(!showMap)}
-              className="md:hidden px-3 py-1.5 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="md:hidden px-3 py-1.5 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105"
             >
               {showMap ? 'Hide' : 'Show'} Map
             </button>
@@ -175,21 +186,55 @@ export default function ResultsPage() {
           {/* City Cards List */}
           <div className="space-y-4 custom-scrollbar overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
             {sortedMetros.map((metro, idx) => (
-              <CityCard
+              <div
                 key={metro.metro_id}
-                metro={metro}
-                rank={idx + 1}
-                onHover={setHoveredMetro}
-              />
+                className="animate-in fade-in slide-in-from-left-4 duration-500"
+                style={{
+                  animationDelay: `${Math.min(idx * 50, 1000)}ms`,
+                  animationFillMode: 'backwards'
+                }}
+              >
+                <CityCard
+                  metro={metro}
+                  rank={idx + 1}
+                  onHover={setHoveredMetro}
+                />
+              </div>
             ))}
           </div>
 
           {/* Map */}
-          <div className={`${showMap ? 'block' : 'hidden'} md:block sticky top-4`} style={{ height: 'calc(100vh - 250px)' }}>
+          <div
+            className={`${showMap ? 'block' : 'hidden'} md:block sticky top-4 animate-in fade-in slide-in-from-right-4 duration-700`}
+            style={{ height: 'calc(100vh - 250px)' }}
+          >
             <MapView metros={sortedMetros} hoveredMetro={hoveredMetro} />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+          <div className="text-center">
+            <div className="relative inline-block mb-6">
+              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-2 border-primary-400 opacity-20"></div>
+              <div className="relative animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-primary-600"></div>
+            </div>
+            <div className="space-y-2 animate-in fade-in duration-700">
+              <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">Loading results</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Please wait...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ResultsContent />
+    </Suspense>
   );
 }
