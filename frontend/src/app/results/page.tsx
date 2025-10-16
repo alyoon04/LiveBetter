@@ -116,7 +116,7 @@ function ResultsContent() {
             {error instanceof Error ? error.message : 'Failed to fetch results'}
           </p>
           <Link
-            href="/"
+            href="/search"
             className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
           >
             Try Again
@@ -142,7 +142,7 @@ function ResultsContent() {
               </p>
             </div>
             <Link
-              href="/"
+              href="/search"
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all hover:scale-105 text-gray-700 dark:text-gray-300"
             >
               Refine Search
@@ -154,7 +154,6 @@ function ResultsContent() {
             <span className="text-sm text-gray-600 dark:text-gray-400 py-2">Sort by:</span>
             {[
               { field: 'score' as SortField, label: 'Affordability' },
-              { field: 'discretionary_income' as SortField, label: 'Discretionary Income' },
               { field: 'rent' as SortField, label: 'Rent' },
               { field: 'rpp_index' as SortField, label: 'Cost of Living' },
             ].map(({ field, label }) => (
