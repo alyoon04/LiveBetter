@@ -11,6 +11,11 @@ class RankRequest(BaseModel):
     rent_cap_pct: float = Field(ge=0.1, le=0.6, default=0.30, description="Maximum rent as percentage of monthly income")
     population_min: int = Field(ge=0, default=0, description="Minimum metro population filter")
     limit: int = Field(ge=1, le=200, default=50, description="Maximum number of results to return")
+    transport_mode: str = Field(
+        default="public_transit",
+        pattern="^(public_transit|car|bike_walk)$",
+        description="Transportation mode: public_transit, car, or bike_walk"
+    )
 
     # Preference weights (0-10 scale, will be normalized)
     affordability_weight: float = Field(ge=0, le=10, default=10, description="How much you value affordability")
@@ -28,6 +33,7 @@ class RankRequest(BaseModel):
                 "rent_cap_pct": 0.3,
                 "population_min": 100000,
                 "limit": 50,
+                "transport_mode": "public_transit",
                 "affordability_weight": 10,
                 "schools_weight": 5,
                 "safety_weight": 8,

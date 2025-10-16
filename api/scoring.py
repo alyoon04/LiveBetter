@@ -24,10 +24,78 @@ def base_groceries(family_size: int) -> float:
 
 
 def base_transport(family_size: int) -> float:
-    """Calculate base monthly transport cost before RPP adjustment"""
+    """Calculate base monthly transport cost before RPP adjustment (legacy - use calculate_transport_cost)"""
     if family_size <= 0:
         raise ValueError("family_size must be >= 1")
     return TRANSPORT_BASE_SINGLE + (family_size - 1) * TRANSPORT_PER_ADDITIONAL
+
+
+def calculate_transport_cost(
+    family_size: int,
+    transport_mode: str,
+    rpp_index: float,
+    walkability: float = None,
+    commute_mins: float = None
+) -> float:
+    """
+    Calculate transport cost based on mode and city characteristics.
+
+    Args:
+        family_size: Number of people in household
+        transport_mode: One of 'public_transit', 'car', 'bike_walk'
+        rpp_index: Regional Price Parity index (1.0 = national average)
+        walkability: Walkability score 0-100 (optional, used for adjustments)
+        commute_mins: Average commute time in minutes (optional)
+
+    Returns:
+        Monthly transport cost adjusted for mode and city characteristics
+    """
+    if family_size <= 0:
+        raise ValueError("family_size must be >= 1")
+
+    # Base costs by mode
+    if transport_mode == "public_transit":
+        base = 100.0 + (family_size - 1) * 40.0
+
+        # Adjust based on walkability (proxy for transit quality)
+        if walkability is not None:
+            if walkability < 45:
+                # Car-dependent cities: transit is inadequate, need occasional rideshare/taxi
+                base *= 1.3
+            elif walkability > 65:
+                # Transit-rich cities: excellent public transit, lower costs
+                base *= 0.85
+
+        # Slight adjustment for long commutes (more transit passes/trips)
+        if commute_mins is not None and commute_mins > 35:
+            base *= 1.05
+
+    elif transport_mode == "car":
+        # Car ownership: insurance, gas, maintenance, parking
+        base = 450.0 + (family_size - 1) * 100.0
+
+        # Penalty for long commutes (more gas, wear and tear)
+        if commute_mins is not None and commute_mins > 35:
+            base *= 1.1
+
+    elif transport_mode == "bike_walk":
+        # Minimal cost: occasional rideshare, bike maintenance
+        base = 50.0
+
+        # This mode heavily depends on walkability
+        # Cost penalty for less walkable cities (need more backup transport)
+        if walkability is not None:
+            if walkability < 50:
+                # Not viable - would need frequent rideshare/transit backup
+                base *= 3.0
+            elif walkability < 65:
+                # Challenging - moderate backup transport needed
+                base *= 1.5
+    else:
+        # Fallback to legacy calculation
+        base = TRANSPORT_BASE_SINGLE + (family_size - 1) * TRANSPORT_PER_ADDITIONAL
+
+    return base * rpp_index
 
 
 def affordability_score(discretionary_income: float) -> float:
@@ -62,7 +130,10 @@ def calculate_metro_affordability(
     eff_tax_rate: float,
     median_rent: float,
     utilities: float,
-    rpp_index: float
+    rpp_index: float,
+    transport_mode: str = "public_transit",
+    walkability: float = None,
+    commute_mins: float = None
 ) -> dict:
     """
     Calculate full affordability metrics for a metro.
@@ -75,6 +146,9 @@ def calculate_metro_affordability(
         median_rent: Monthly median rent for metro
         utilities: Monthly utilities cost
         rpp_index: Regional Price Parity index (1.0 = national average)
+        transport_mode: Transportation mode ('public_transit', 'car', 'bike_walk')
+        walkability: Walkability score 0-100 (optional)
+        commute_mins: Average commute time in minutes (optional)
 
     Returns:
         Dictionary with all calculated metrics
@@ -86,9 +160,17 @@ def calculate_metro_affordability(
     # Rent: use median, but cap at rent_cap_pct of income
     rent = max(float(median_rent), net_monthly * rent_cap_pct)
 
-    # Groceries and transport: base amount scaled by family size and RPP
+    # Groceries: base amount scaled by family size and RPP
     groceries = base_groceries(family_size) * rpp_index
-    transport = base_transport(family_size) * rpp_index
+
+    # Transport: mode-based calculation with city characteristics
+    transport = calculate_transport_cost(
+        family_size=family_size,
+        transport_mode=transport_mode,
+        rpp_index=rpp_index,
+        walkability=walkability,
+        commute_mins=commute_mins
+    )
 
     # Total essentials
     essentials = rent + utilities + groceries + transport

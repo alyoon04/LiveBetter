@@ -53,7 +53,7 @@ def rank_metros(req: RankRequest):
 
         for metro in metros:
             try:
-                # Calculate affordability metrics
+                # Calculate affordability metrics with transport mode
                 metrics = calculate_metro_affordability(
                     salary=req.salary,
                     family_size=req.family_size,
@@ -61,7 +61,10 @@ def rank_metros(req: RankRequest):
                     eff_tax_rate=float(metro.eff_tax_rate),
                     median_rent=float(metro.median_rent_usd),
                     utilities=float(metro.utilities_monthly),
-                    rpp_index=float(metro.rpp_index)
+                    rpp_index=float(metro.rpp_index),
+                    transport_mode=req.transport_mode,
+                    walkability=float(metro.walkability_score) if metro.walkability_score is not None else None,
+                    commute_mins=float(metro.commute_time_mins) if metro.commute_time_mins is not None else None
                 )
 
                 affordability_score = metrics["score"]
@@ -119,6 +122,16 @@ def rank_metros(req: RankRequest):
                 # Log error but continue with other metros
                 print(f"Error processing metro {metro.name}: {e}")
                 continue
+
+        # Filter and adjust for bike/walk mode
+        if req.transport_mode == "bike_walk":
+            # Filter out cities with low walkability (not viable for bike/walk)
+            results = [r for r in results if r.quality_of_life and r.quality_of_life.walkability_score and r.quality_of_life.walkability_score >= 50]
+
+            # Boost score for highly walkable cities
+            for result in results:
+                if result.quality_of_life and result.quality_of_life.walkability_score and result.quality_of_life.walkability_score > 75:
+                    result.score = min(1.0, result.score * 1.15)  # 15% boost, capped at 1.0
 
         # Sort by score (descending)
         results.sort(key=lambda x: x.score, reverse=True)

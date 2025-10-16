@@ -10,6 +10,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        gray: {
+          850: '#1a202e',
+          950: '#0f1419',
+        },
         primary: {
           DEFAULT: '#2563EB',
           50: '#EFF6FF',

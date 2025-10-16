@@ -10,6 +10,7 @@ LiveBetter ranks U.S. metropolitan areas by affordability using real data from a
 
 - **Real Production Data**: Zillow rent prices, BEA cost-of-living indices, Census population
 - **Transparent Cost Breakdown**: See rent, utilities, groceries, and transport costs
+- **Transportation Mode Options**: Customize for public transit, car ownership, or bike/walk lifestyle
 - **After-Tax Calculations**: Accurate federal and state tax estimates
 - **Regional Cost Adjustments**: RPP-adjusted purchasing power
 - **Interactive Map**: Visual exploration with Leaflet
@@ -213,6 +214,7 @@ Rank metros by affordability.
   "rent_cap_pct": 0.3,
   "population_min": 100000,
   "limit": 50,
+  "transport_mode": "public_transit",
   "affordability_weight": 10,
   "schools_weight": 0,
   "safety_weight": 0,
@@ -221,6 +223,18 @@ Rank metros by affordability.
   "walkability_weight": 0
 }
 ```
+
+**Parameters:**
+- `salary`: Annual pre-tax salary (10,000 - 1,000,000)
+- `family_size`: Household size (1-10)
+- `rent_cap_pct`: Maximum rent as % of income (0.1 - 0.6, default 0.3)
+- `population_min`: Filter by minimum metro population (default 0)
+- `limit`: Max number of results (1-200, default 50)
+- `transport_mode`: Transportation preference (default "public_transit")
+  - `"public_transit"`: Lower costs in walkable cities with good transit
+  - `"car"`: Car ownership with insurance, gas, maintenance, parking
+  - `"bike_walk"`: Minimal costs, filters to walkable cities only
+- `affordability_weight` - `walkability_weight`: Quality of life preference weights (0-10)
 
 **Response:**
 ```json
@@ -259,6 +273,7 @@ curl -X POST http://localhost:8001/api/rank \
     "rent_cap_pct": 0.3,
     "population_min": 0,
     "limit": 20,
+    "transport_mode": "public_transit",
     "affordability_weight": 10,
     "schools_weight": 0,
     "safety_weight": 0,
@@ -286,7 +301,15 @@ The app calculates a 0-1 affordability score based on discretionary income:
    - **Rent**: Real Zillow median, capped at `rent_cap_pct` of net income
    - **Utilities**: ~$150-200/month (state baseline)
    - **Groceries**: $350/person + $150 per additional, scaled by RPP
-   - **Transport**: $250/person + $75 per additional, scaled by RPP
+   - **Transport**: Mode-based calculation, scaled by RPP and city characteristics
+     - **Public Transit**: $100 + $40 per person
+       - 15% discount in walkable cities (walkability > 65)
+       - 30% penalty in car-dependent cities (walkability < 45)
+     - **Car Owner**: $450 + $100 per person (includes insurance, gas, maintenance, parking)
+       - 10% penalty for long commutes (> 35 min)
+     - **Bike/Walk**: $50 flat (minimal costs)
+       - Cities with walkability < 50 are filtered out
+       - 15% score boost for highly walkable cities (> 75)
 
 4. **Discretionary Income**:
    ```
@@ -373,7 +396,8 @@ Or connect GitHub repo to Vercel for automatic deployments.
 - **Population**: Census estimates (updated annually)
 - **Tax calculations**: Simplified (standard deduction only, no itemized deductions)
 - **Cost estimates**: Metro-level averages (neighborhood variation not captured)
-- **No quality-of-life factors**: Schools, crime, weather, healthcare not included
+- **Transport costs**: Estimated based on mode and city walkability (not personalized to individual commute)
+- **Quality-of-life factors**: Currently limited to walkability/commute metrics
 
 ## Roadmap
 
@@ -381,12 +405,14 @@ Or connect GitHub repo to Vercel for automatic deployments.
 - [x] BEA RPP integration
 - [x] Accurate tax calculations
 - [x] Interactive map
+- [x] Transportation mode preferences (public transit, car, bike/walk)
 - [ ] Automate Zillow data updates (if API becomes available)
-- [ ] Quality-of-life metrics (if free data sources found)
+- [ ] Enhanced quality-of-life metrics (schools, crime, weather, healthcare)
 - [ ] User authentication and saved searches
 - [ ] Healthcare cost estimates
 - [ ] Neighborhood-level data (vs metro-level)
 - [ ] Historical trend analysis
+- [ ] Transit quality scores and public transit coverage data
 
 ## Contributing
 

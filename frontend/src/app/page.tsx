@@ -5,7 +5,7 @@ import { TypingAnimation } from '@/components/TypingAnimation';
 
 export default function Home() {
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 min-h-[calc(100vh-180px)]">
+    <div className="bg-gradient-to-b from-primary-100 via-primary-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-700 min-h-[calc(100vh-180px)]">
       <div className="container mx-auto px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-12">
