@@ -1,9 +1,63 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { TypingAnimation } from '@/components/TypingAnimation';
 
 export default function Home() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          } else {
+            entry.target.classList.remove('visible');
+          }
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '0px 0px -100px 0px',
+      }
+    );
+
+    // Observe all feature blocks
+    const featureBlocks = document.querySelectorAll('.feature-block');
+    featureBlocks.forEach((block) => observer.observe(block));
+
+    // Observe "How It Works" steps
+    const howItWorksSteps = document.querySelectorAll('.how-it-works-step');
+    howItWorksSteps.forEach((step) => observer.observe(step));
+
+    // Handle timeline line scroll progress
+    const timelineLine = document.querySelector('.timeline-line');
+    const updateTimelineLine = () => {
+      if (!timelineLine) return;
+
+      const rect = timelineLine.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const timelineTop = rect.top;
+      const timelineHeight = rect.height;
+
+      // Calculate how much of the timeline should be visible
+      const scrollProgress = Math.max(0, Math.min(1,
+        (windowHeight - timelineTop) / (windowHeight + timelineHeight)
+      ));
+
+      (timelineLine as HTMLElement).style.transform = `scaleY(${scrollProgress})`;
+    };
+
+    // Update on scroll
+    window.addEventListener('scroll', updateTimelineLine);
+    updateTimelineLine(); // Initial call
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', updateTimelineLine);
+    };
+  }, []);
+
   return (
     <div className="bg-gradient-to-b from-primary-100 via-primary-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 min-h-[calc(100vh-180px)]">
       <div className="container mx-auto px-4 py-16">
@@ -32,45 +86,54 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Feature Highlights */}
-        <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-card hover:shadow-xl transition-all transform hover:scale-105 animate-slide-left delay-200">
-            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center mb-6 transition-all hover:rotate-6">
-              <svg className="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
+        {/* Feature Highlights - Timeline */}
+        <div className="mt-24 max-w-4xl mx-auto relative">
+          {/* Vertical connecting line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-primary-300 dark:via-primary-700 to-transparent hidden md:block timeline-line"></div>
+
+          {/* Feature 1 - Left aligned */}
+          <div className="relative mb-20 feature-block" data-direction="left">
+            <div className="md:w-1/2 md:pr-12 text-left md:text-right feature-content">
+              <h3 className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-4">
+                Real Market Data
+              </h3>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                Rankings based on actual median rent prices from Zillow, regional price parities from the Bureau of Economic Analysis,
+                and up-to-date population data from the Census Bureau
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">Real Market Data</h3>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              Rankings based on actual median rent prices from Zillow, regional price parities from the Bureau of Economic Analysis,
-              and up-to-date population data from the Census Bureau
-            </p>
+            {/* Timeline dot */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary-600 dark:bg-primary-400 rounded-full border-4 border-white dark:border-gray-900 hidden md:block timeline-dot"></div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-card hover:shadow-xl transition-all transform hover:scale-105 animate-slide-left delay-400">
-            <div className="w-16 h-16 bg-accent-100 dark:bg-accent-900 rounded-xl flex items-center justify-center mb-6 transition-all hover:rotate-6">
-              <svg className="w-8 h-8 text-accent-600 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
+          {/* Feature 2 - Right aligned */}
+          <div className="relative mb-20 feature-block" data-direction="right">
+            <div className="md:w-1/2 md:ml-auto md:pl-12 text-left feature-content">
+              <h3 className="text-3xl font-bold text-accent-600 dark:text-accent-400 mb-4">
+                Transparent Breakdown
+              </h3>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                See exactly how your money is allocated across rent, utilities, groceries, and transportation.
+                Know your discretionary income after essential expenses in each city
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">Transparent Breakdown</h3>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              See exactly how your money is allocated across rent, utilities, groceries, and transportation.
-              Know your discretionary income after essential expenses in each city
-            </p>
+            {/* Timeline dot */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-accent-600 dark:bg-accent-400 rounded-full border-4 border-white dark:border-gray-900 hidden md:block timeline-dot"></div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-card hover:shadow-xl transition-all transform hover:scale-105 animate-slide-left delay-600">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mb-6 transition-all hover:rotate-6">
-              <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
+          {/* Feature 3 - Left aligned */}
+          <div className="relative feature-block" data-direction="left">
+            <div className="md:w-1/2 md:pr-12 text-left md:text-right feature-content">
+              <h3 className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-4">
+                Transportation Modes
+              </h3>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                Customize rankings based on your lifestyle: public transit user, car owner, or bike/walk enthusiast.
+                Cities are adjusted for walkability and transit quality
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">Transportation Modes</h3>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              Customize rankings based on your lifestyle: public transit user, car owner, or bike/walk enthusiast.
-              Cities are adjusted for walkability and transit quality
-            </p>
+            {/* Timeline dot */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-purple-600 dark:bg-purple-400 rounded-full border-4 border-white dark:border-gray-900 hidden md:block timeline-dot"></div>
           </div>
         </div>
 
@@ -81,7 +144,7 @@ export default function Home() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-            <div className="flex flex-col items-center text-center">
+            <div className="flex flex-col items-center text-center how-it-works-step">
               <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">
                 1
               </div>
@@ -91,7 +154,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex flex-col items-center text-center">
+            <div className="flex flex-col items-center text-center how-it-works-step">
               <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">
                 2
               </div>
@@ -101,7 +164,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex flex-col items-center text-center">
+            <div className="flex flex-col items-center text-center how-it-works-step">
               <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">
                 3
               </div>
