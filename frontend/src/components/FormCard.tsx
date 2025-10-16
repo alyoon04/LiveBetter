@@ -12,6 +12,7 @@ export function FormCard() {
     rent_cap_pct: 0.3,
     population_min: 0,
     limit: 50,
+    transport_mode: 'public_transit',
     affordability_weight: 10,
     schools_weight: 0,
     safety_weight: 0,
@@ -55,6 +56,7 @@ export function FormCard() {
         rent_cap_pct: formData.rent_cap_pct.toString(),
         population_min: formData.population_min.toString(),
         limit: formData.limit.toString(),
+        transport_mode: formData.transport_mode,
       });
       router.push(`/results?${params.toString()}`);
     }
@@ -109,6 +111,28 @@ export function FormCard() {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Transportation Mode */}
+        <div>
+          <label htmlFor="transport_mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Transportation Mode
+          </label>
+          <select
+            id="transport_mode"
+            value={formData.transport_mode}
+            onChange={(e) => setFormData({ ...formData, transport_mode: e.target.value as 'public_transit' | 'car' | 'bike_walk' })}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer"
+          >
+            <option value="public_transit">Public Transit User</option>
+            <option value="car">Car Owner</option>
+            <option value="bike_walk">Bike/Walk Primarily</option>
+          </select>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {formData.transport_mode === 'public_transit' && 'Lower costs in walkable, transit-rich cities'}
+            {formData.transport_mode === 'car' && 'Includes insurance, gas, maintenance, and parking'}
+            {formData.transport_mode === 'bike_walk' && 'Minimal costs, prioritizes highly walkable cities'}
+          </p>
         </div>
 
         {/* Rent Cap Slider */}

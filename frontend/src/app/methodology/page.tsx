@@ -83,12 +83,35 @@ export default function MethodologyPage() {
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                  Groceries & Transport (Scaled Baskets)
+                  Groceries (Scaled Baskets)
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">
                   Base monthly costs per person, scaled by household size and adjusted by RPP.
-                  Single: $350 groceries + $250 transport. Each additional person: +$150 groceries, +$75 transport.
+                  Single: $350 groceries. Each additional person: +$150 groceries.
                 </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  Transportation (Mode-Based)
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
+                  Transportation costs vary by your chosen mode and city characteristics:
+                </p>
+                <div className="ml-4 space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                  <div>
+                    <span className="font-semibold">Public Transit:</span> $100 + $40 per additional person, adjusted by RPP.
+                    Lower costs (15% discount) in walkable, transit-rich cities (walkability &gt; 65).
+                    Higher costs (30% premium) in car-dependent areas (walkability &lt; 45).
+                  </div>
+                  <div>
+                    <span className="font-semibold">Car Owner:</span> $450 + $100 per additional person, adjusted by RPP.
+                    Includes insurance, gas, maintenance, and parking. 10% penalty for long commutes (&gt; 35 min).
+                  </div>
+                  <div>
+                    <span className="font-semibold">Bike/Walk:</span> $50 flat minimal cost (occasional rideshare/bike maintenance).
+                    Cities with walkability &lt; 50 are filtered out as non-viable. 15% score boost for walkability &gt; 75.
+                  </div>
+                </div>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -162,10 +185,10 @@ export default function MethodologyPage() {
                 <div>2. Adjusted for RPP (0.95): $5,475 / 0.95 = $5,763</div>
                 <div>3. Rent: $1,450, Utilities: $165</div>
                 <div>4. Groceries: (350 + 150) × 0.95 = $475</div>
-                <div>5. Transport: (250 + 75) × 0.95 = $309</div>
-                <div>6. Essentials total: $2,399</div>
-                <div>7. Discretionary: $5,763 - $2,399 = $3,364</div>
-                <div>8. Score: 1/(1+e^(-(3364-1500)/400)) ≈ 0.96</div>
+                <div>5. Transport (Public Transit, walkability 48): (100 + 40) × 0.95 = $133</div>
+                <div>6. Essentials total: $2,223</div>
+                <div>7. Discretionary: $5,763 - $2,223 = $3,540</div>
+                <div>8. Score: (3540 - (-500)) / (6000 - (-500)) ≈ 0.62</div>
               </div>
             </div>
           </section>

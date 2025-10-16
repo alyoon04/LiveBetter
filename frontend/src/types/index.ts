@@ -6,6 +6,7 @@ export interface RankRequest {
   rent_cap_pct: number;
   population_min: number;
   limit: number;
+  transport_mode: 'public_transit' | 'car' | 'bike_walk';
   // Preference weights (0-10 scale)
   affordability_weight: number;
   schools_weight: number;
