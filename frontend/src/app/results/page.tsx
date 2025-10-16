@@ -23,6 +23,7 @@ function ResultsContent() {
     rent_cap_pct: parseFloat(searchParams.get('rent_cap_pct') || '0.3'),
     population_min: parseInt(searchParams.get('population_min') || '0'),
     limit: parseInt(searchParams.get('limit') || '50'),
+    transport_mode: (searchParams.get('transport_mode') || 'public_transit') as 'public_transit' | 'car' | 'bike_walk',
     affordability_weight: 10,
     schools_weight: 0,
     safety_weight: 0,
