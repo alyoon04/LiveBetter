@@ -101,10 +101,93 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
         </svg>
       </button>
 
+      {/* Quality of Life Badges - Always Visible */}
+      {metro.quality_of_life && (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {metro.quality_of_life.weather_score !== undefined && metro.quality_of_life.weather_score !== null && (
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-full text-xs font-medium">
+              <span>☀️</span>
+              <span>Weather {metro.quality_of_life.weather_score.toFixed(0)}/100</span>
+            </div>
+          )}
+          {metro.quality_of_life.air_quality_index !== undefined && metro.quality_of_life.air_quality_index !== null && (
+            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+              metro.quality_of_life.air_quality_index <= 50
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                : metro.quality_of_life.air_quality_index <= 100
+                ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+                : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
+            }`}>
+              <span>🌬️</span>
+              <span>AQI {metro.quality_of_life.air_quality_index.toFixed(0)}</span>
+            </div>
+          )}
+          {metro.quality_of_life.walkability_score !== undefined && metro.quality_of_life.walkability_score !== null && (
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
+              <span>🚶</span>
+              <span>Walk {metro.quality_of_life.walkability_score.toFixed(0)}/100</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Expanded Breakdown */}
       {expanded && (
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          {/* Quality of Life Section */}
+          {metro.quality_of_life && (
+            <div className="mb-4 p-3 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Quality of Life</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {metro.quality_of_life.weather_score !== undefined && metro.quality_of_life.weather_score !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">☀️ Weather</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.weather_score.toFixed(0)}/100</span>
+                  </div>
+                )}
+                {metro.quality_of_life.air_quality_index !== undefined && metro.quality_of_life.air_quality_index !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">🌬️ Air Quality</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.air_quality_index.toFixed(0)} AQI</span>
+                  </div>
+                )}
+                {metro.quality_of_life.school_score !== undefined && metro.quality_of_life.school_score !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">🎓 Schools</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.school_score.toFixed(0)}/100</span>
+                  </div>
+                )}
+                {metro.quality_of_life.crime_rate !== undefined && metro.quality_of_life.crime_rate !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">🛡️ Safety</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.crime_rate.toFixed(0)}/100k</span>
+                  </div>
+                )}
+                {metro.quality_of_life.healthcare_score !== undefined && metro.quality_of_life.healthcare_score !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">🏥 Healthcare</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.healthcare_score.toFixed(0)}/100</span>
+                  </div>
+                )}
+                {metro.quality_of_life.walkability_score !== undefined && metro.quality_of_life.walkability_score !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">🚶 Walkability</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.walkability_score.toFixed(0)}/100</span>
+                  </div>
+                )}
+                {metro.quality_of_life.commute_time_mins !== undefined && metro.quality_of_life.commute_time_mins !== null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">🚗 Commute</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.commute_time_mins.toFixed(0)} min</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Cost Breakdown */}
           <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Monthly Costs</h4>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">Rent</span>
               <span className="font-mono font-medium text-gray-900 dark:text-gray-100">

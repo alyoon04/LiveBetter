@@ -12,9 +12,16 @@ export const api = axios.create({
   timeout: 30000, // 30 second timeout
 });
 
-export const rankMetros = async (request: RankRequest): Promise<RankResponse> => {
+export const rankMetros = async (request: RankRequest): Promise<RankResponse & { _responseTime?: number }> => {
+  const startTime = performance.now();
   const response = await api.post<RankResponse>('/api/rank', request);
-  return response.data;
+  const endTime = performance.now();
+  const responseTime = Math.round(endTime - startTime);
+
+  return {
+    ...response.data,
+    _responseTime: responseTime,
+  };
 };
 
 export const healthCheck = async (): Promise<{ status: string; version: string }> => {

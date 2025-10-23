@@ -70,8 +70,8 @@ export default function Home() {
             />
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-            Discover which U.S. cities offer the best affordability based on your salary,
-            household size, and transportation preferences
+            Discover which U.S. cities offer the best value based on your salary,
+            household size, and lifestyle priorities—from affordability to weather, schools, and walkability
           </p>
 
           <Link
@@ -122,7 +122,7 @@ export default function Home() {
           </div>
 
           {/* Feature 3 - Left aligned */}
-          <div className="relative feature-block" data-direction="left">
+          <div className="relative mb-20 feature-block" data-direction="left">
             <div className="md:w-1/2 md:pr-12 text-left md:text-right feature-content">
               <h3 className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-4">
                 Transportation Modes
@@ -134,6 +134,21 @@ export default function Home() {
             </div>
             {/* Timeline dot */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-purple-600 dark:bg-purple-400 rounded-full border-4 border-white dark:border-gray-900 hidden md:block timeline-dot"></div>
+          </div>
+
+          {/* Feature 4 - Right aligned */}
+          <div className="relative feature-block" data-direction="right">
+            <div className="md:w-1/2 md:ml-auto md:pl-12 text-left feature-content">
+              <h3 className="text-3xl font-bold text-green-600 dark:text-green-400 mb-4">
+                Quality of Life Factors
+              </h3>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                Prioritize what matters most to you: weather, school quality, safety, healthcare, walkability, and air quality.
+                Customize weights to create your personalized ranking
+              </p>
+            </div>
+            {/* Timeline dot */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-green-600 dark:bg-green-400 rounded-full border-4 border-white dark:border-gray-900 hidden md:block timeline-dot"></div>
           </div>
         </div>
 

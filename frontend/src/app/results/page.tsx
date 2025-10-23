@@ -24,12 +24,12 @@ function ResultsContent() {
     population_min: parseInt(searchParams.get('population_min') || '0'),
     limit: parseInt(searchParams.get('limit') || '50'),
     transport_mode: (searchParams.get('transport_mode') || 'public_transit') as 'public_transit' | 'car' | 'bike_walk',
-    affordability_weight: 10,
-    schools_weight: 0,
-    safety_weight: 0,
-    weather_weight: 0,
-    healthcare_weight: 0,
-    walkability_weight: 0,
+    affordability_weight: parseInt(searchParams.get('affordability_weight') || '10'),
+    schools_weight: parseInt(searchParams.get('schools_weight') || '0'),
+    safety_weight: parseInt(searchParams.get('safety_weight') || '0'),
+    weather_weight: parseInt(searchParams.get('weather_weight') || '0'),
+    healthcare_weight: parseInt(searchParams.get('healthcare_weight') || '0'),
+    walkability_weight: parseInt(searchParams.get('walkability_weight') || '0'),
   };
 
   // Fetch rankings
@@ -136,10 +136,27 @@ function ResultsContent() {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Top {sortedMetros.length} U.S. cities
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Ranked for ${request.salary.toLocaleString()}/year salary
-                {request.family_size > 1 && ` · ${request.family_size} people`}
-              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-gray-600 dark:text-gray-400">
+                  Ranked for ${request.salary.toLocaleString()}/year salary
+                  {request.family_size > 1 && ` · ${request.family_size} people`}
+                </p>
+                {data?._responseTime !== undefined && (
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    data._responseTime < 100
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                      : data._responseTime < 500
+                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400'
+                  }`}>
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    {data._responseTime}ms
+                    {data._responseTime < 100 && ' (cached)'}
+                  </span>
+                )}
+              </div>
             </div>
             <Link
               href="/search"

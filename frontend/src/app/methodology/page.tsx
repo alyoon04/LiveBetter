@@ -24,18 +24,23 @@ export default function MethodologyPage() {
           {/* Formula */}
           <section className="animate-slide-down" style={{ animationDelay: '0.4s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              Affordability Score Formula
+              Composite Scoring System
             </h3>
             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 font-mono text-sm space-y-2">
+              <div className="font-semibold text-primary-600 dark:text-primary-400 mb-2">Affordability Component:</div>
               <div>1. Net Monthly Income = (Salary × (1 - Tax Rate)) / 12</div>
               <div>2. Adjusted Income = Net Monthly / RPP Index</div>
               <div>3. Essentials = Rent + Utilities + Groceries + Transport</div>
               <div>4. Discretionary Income = Adjusted Income - Essentials</div>
-              <div>5. Score = (DI - Min) / (Max - Min)</div>
+              <div>5. Affordability Score = (DI - Min) / (Max - Min)</div>
+              <div className="font-semibold text-accent-600 dark:text-accent-400 mt-4 mb-2">Quality of Life Components:</div>
+              <div>6. QoL Scores = Normalized metrics (schools, safety, weather, etc.)</div>
+              <div>7. Final Score = Weighted average of all components</div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              Scores are linearly normalized based on discretionary income, where -$500/month scores 0%
-              and $6,000/month scores 100%. This provides clear differentiation between cities.
+              Affordability scores are linearly normalized where -$500/month scores 0% and $6,000/month scores 100%.
+              Quality of life metrics are normalized to 0-1 scale and weighted by your preferences (0-10 each).
+              The final score combines all factors based on your selected priorities.
             </p>
           </section>
 
@@ -126,6 +131,74 @@ export default function MethodologyPage() {
             </div>
           </section>
 
+          {/* Quality of Life Data */}
+          <section className="animate-slide-down" style={{ animationDelay: '0.7s' }}>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Quality of Life Metrics
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  ☀️ Weather Score (Open-Meteo API)
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Climate comfort score (0-100) based on temperature ranges, precipitation frequency, and sunshine hours.
+                  Free weather API with no authentication required.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  🌬️ Air Quality Index (EPA AirNow)
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Current air quality index from EPA AirNow API. Lower values indicate better air quality
+                  (0-50 = Good, 51-100 = Moderate, 101+ = Unhealthy).
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  🎓 School Quality Score
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Composite score based on standardized test performance and graduation rates in the metro area.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  🛡️ Safety (Crime Rate per 100k)
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Violent and property crime rates per 100,000 residents. Lower numbers indicate safer communities.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  🏥 Healthcare Score
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Healthcare access and quality rating based on hospital density, quality ratings, and physician availability.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  🚶 Walkability Score
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Walk Score® metric measuring pedestrian-friendliness based on proximity to amenities, pedestrian infrastructure,
+                  and walkable destinations. Scores range from 0-100 (90-100 = Walker's Paradise, 70-89 = Very Walkable, 50-69 = Somewhat Walkable).
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  🚗 Average Commute Time
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Mean commute time in minutes for metro area workers, from Census Bureau data.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Limitations */}
           <section className="animate-slide-down" style={{ animationDelay: '0.8s' }}>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
@@ -136,8 +209,8 @@ export default function MethodologyPage() {
                 <li>Data reflects 2024-2025 estimates and may not capture rapid local changes</li>
                 <li>Tax calculations are simplified and do not include all deductions or credits</li>
                 <li>Individual costs vary significantly based on lifestyle and specific neighborhoods</li>
-                <li>Quality-of-life factors (weather, safety, culture) are not included in MVP scoring</li>
-                <li>Healthcare, childcare, and debt payments are not factored in</li>
+                <li>Quality-of-life data availability varies by metro; some cities may have incomplete QoL metrics</li>
+                <li>Healthcare, childcare, and debt payments are not factored into affordability calculations</li>
               </ul>
             </div>
           </section>
@@ -149,8 +222,14 @@ export default function MethodologyPage() {
             </h3>
             <ul className="space-y-2 text-gray-700 dark:text-gray-300">
               <li className="flex items-start gap-2">
-                <span className="text-primary-600 dark:text-primary-400">•</span>
-                <span>Quality-of-life metrics (crime rates, schools, weather, culture)</span>
+                <span className="text-green-600 dark:text-green-400">✓</span>
+                <span className="line-through opacity-75">Quality-of-life metrics (crime rates, schools, weather, air quality, walkability)</span>
+                <span className="text-xs text-green-600 dark:text-green-400 font-semibold">IMPLEMENTED</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600 dark:text-green-400">✓</span>
+                <span className="line-through opacity-75">Redis caching for fast response times</span>
+                <span className="text-xs text-green-600 dark:text-green-400 font-semibold">IMPLEMENTED</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary-600 dark:text-primary-400">•</span>
@@ -159,6 +238,10 @@ export default function MethodologyPage() {
               <li className="flex items-start gap-2">
                 <span className="text-primary-600 dark:text-primary-400">•</span>
                 <span>Healthcare and childcare cost estimates</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary-600 dark:text-primary-400">•</span>
+                <span>Cultural amenities scoring (restaurants, arts, entertainment)</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary-600 dark:text-primary-400">•</span>

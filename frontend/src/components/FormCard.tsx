@@ -23,6 +23,7 @@ export function FormCard() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -57,6 +58,12 @@ export function FormCard() {
         population_min: formData.population_min.toString(),
         limit: formData.limit.toString(),
         transport_mode: formData.transport_mode,
+        affordability_weight: formData.affordability_weight.toString(),
+        schools_weight: formData.schools_weight.toString(),
+        safety_weight: formData.safety_weight.toString(),
+        weather_weight: formData.weather_weight.toString(),
+        healthcare_weight: formData.healthcare_weight.toString(),
+        walkability_weight: formData.walkability_weight.toString(),
       });
       router.push(`/results?${params.toString()}`);
     }
@@ -177,6 +184,163 @@ export function FormCard() {
             <option value="500000">500,000+</option>
             <option value="1000000">1,000,000+</option>
           </select>
+        </div>
+
+        {/* Quality of Life Preferences - Collapsible */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+          >
+            <span>Quality of Life Priorities</span>
+            <svg
+              className={`w-5 h-5 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Adjust how much each factor matters to you (0-10). Higher weights prioritize that factor in rankings.
+              </p>
+
+              {/* Affordability Weight */}
+              <div>
+                <label htmlFor="affordability_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="mr-2">💰</span>
+                  Affordability
+                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
+                    {formData.affordability_weight}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  id="affordability_weight"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={formData.affordability_weight}
+                  onChange={(e) => setFormData({ ...formData, affordability_weight: parseInt(e.target.value) })}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                />
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <span>Not important</span>
+                  <span>Very important</span>
+                </div>
+              </div>
+
+              {/* Schools Weight */}
+              <div>
+                <label htmlFor="schools_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="mr-2">🎓</span>
+                  School Quality
+                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
+                    {formData.schools_weight}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  id="schools_weight"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={formData.schools_weight}
+                  onChange={(e) => setFormData({ ...formData, schools_weight: parseInt(e.target.value) })}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                />
+              </div>
+
+              {/* Safety Weight */}
+              <div>
+                <label htmlFor="safety_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="mr-2">🛡️</span>
+                  Safety
+                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
+                    {formData.safety_weight}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  id="safety_weight"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={formData.safety_weight}
+                  onChange={(e) => setFormData({ ...formData, safety_weight: parseInt(e.target.value) })}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                />
+              </div>
+
+              {/* Weather Weight */}
+              <div>
+                <label htmlFor="weather_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="mr-2">☀️</span>
+                  Weather
+                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
+                    {formData.weather_weight}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  id="weather_weight"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={formData.weather_weight}
+                  onChange={(e) => setFormData({ ...formData, weather_weight: parseInt(e.target.value) })}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                />
+              </div>
+
+              {/* Healthcare Weight */}
+              <div>
+                <label htmlFor="healthcare_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="mr-2">🏥</span>
+                  Healthcare
+                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
+                    {formData.healthcare_weight}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  id="healthcare_weight"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={formData.healthcare_weight}
+                  onChange={(e) => setFormData({ ...formData, healthcare_weight: parseInt(e.target.value) })}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                />
+              </div>
+
+              {/* Walkability Weight */}
+              <div>
+                <label htmlFor="walkability_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="mr-2">🚶</span>
+                  Walkability
+                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
+                    {formData.walkability_weight}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  id="walkability_weight"
+                  min="0"
+                  max="10"
+                  step="1"
+                  value={formData.walkability_weight}
+                  onChange={(e) => setFormData({ ...formData, walkability_weight: parseInt(e.target.value) })}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Submit Button */}
