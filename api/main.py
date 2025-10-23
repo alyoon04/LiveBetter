@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import rank
 from models import HealthResponse
 from db import db
+from cache import cache
 
 # Application metadata
 VERSION = "1.0.0"
@@ -69,25 +70,23 @@ def root():
     }
 
 
-@app.get("/health", response_model=HealthResponse, tags=["health"])
+@app.get("/health", tags=["health"])
 def health_check():
     """
     Health check endpoint.
-    Returns database connectivity status and metro count.
+    Returns database connectivity status, metro count, and cache status.
     """
-    health = db.health_check()
+    db_health = db.health_check()
+    cache_health = cache.health_check()
 
-    if health["status"] == "healthy":
-        return HealthResponse(
-            status="healthy",
-            version=VERSION,
-            metros_count=health["metros"]
-        )
-    else:
-        return HealthResponse(
-            status="unhealthy",
-            version=VERSION
-        )
+    overall_status = "healthy" if db_health["status"] == "healthy" else "unhealthy"
+
+    return {
+        "status": overall_status,
+        "version": VERSION,
+        "database": db_health,
+        "cache": cache_health
+    }
 
 
 # For local development

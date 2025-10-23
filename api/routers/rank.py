@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 import sys
 from pathlib import Path
+import logging
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -12,8 +13,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from models import RankRequest, RankResponse, ResultMetro, Essentials, Coords, QualityOfLife
 from db import db
 from scoring import calculate_metro_affordability, calculate_qol_scores, calculate_composite_score
+from cache import cache
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/rank", response_model=RankResponse, tags=["ranking"])
@@ -28,6 +31,28 @@ def rank_metros(req: RankRequest):
 
     Returns metros sorted by affordability score (highest first).
     """
+    # Generate cache key from request parameters
+    cache_key = cache._generate_cache_key(
+        "rank",
+        salary=req.salary,
+        family_size=req.family_size,
+        rent_cap_pct=req.rent_cap_pct,
+        population_min=req.population_min,
+        limit=req.limit,
+        affordability_weight=req.affordability_weight,
+        schools_weight=req.schools_weight,
+        safety_weight=req.safety_weight,
+        weather_weight=req.weather_weight,
+        healthcare_weight=req.healthcare_weight,
+        walkability_weight=req.walkability_weight
+    )
+
+    # Try to get from cache
+    cached_response = cache.get(cache_key)
+    if cached_response is not None:
+        logger.info(f"Cache hit for rank request")
+        return RankResponse(**cached_response)
+
     try:
         # Fetch metros with cost data from database
         metros = db.fetch_metros_with_costs(population_min=req.population_min)
@@ -139,7 +164,13 @@ def rank_metros(req: RankRequest):
         # Limit results
         results = results[:req.limit]
 
-        return RankResponse(input=req, results=results)
+        response = RankResponse(input=req, results=results)
+
+        # Cache the response (1 hour TTL for ranking results)
+        cache.set(cache_key, response.model_dump(), ttl=3600)
+        logger.info(f"Cached rank response")
+
+        return response
 
     except HTTPException:
         raise
