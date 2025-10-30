@@ -1,9 +1,17 @@
 """
 LiveBetter FastAPI application
 """
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+# Look for .env in parent directory (project root)
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(dotenv_path=env_path)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import rank
+from routers import rank, nl_parser
 from models import HealthResponse
 from db import db
 from cache import cache
@@ -57,6 +65,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(rank.router, prefix="/api", tags=["ranking"])
+app.include_router(nl_parser.router, prefix="/api", tags=["natural-language"])
 
 
 @app.get("/", tags=["health"])

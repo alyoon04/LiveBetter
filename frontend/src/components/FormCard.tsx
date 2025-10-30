@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RankRequest } from '@/types';
+import { NaturalLanguageInput } from './NaturalLanguageInput';
 
 export function FormCard() {
   const router = useRouter();
@@ -24,6 +25,16 @@ export function FormCard() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showNLInput, setShowNLInput] = useState(true);
+  const [nlSuccess, setNlSuccess] = useState(false);
+
+  const handleParsedPreferences = (parsed: RankRequest) => {
+    setFormData(parsed);
+    setNlSuccess(true);
+    setShowNLInput(false);
+    // Clear success message after 3 seconds
+    setTimeout(() => setNlSuccess(false), 3000);
+  };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -71,6 +82,53 @@ export function FormCard() {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card p-8 max-w-2xl mx-auto backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+      {/* Natural Language Input Section - Collapsible */}
+      <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          onClick={() => setShowNLInput(!showNLInput)}
+          className="w-full flex items-center justify-between text-left mb-3"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">✨</span>
+            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Quick Start: Describe Your Preferences
+            </span>
+          </div>
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${showNLInput ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {showNLInput && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+            <NaturalLanguageInput onParsed={handleParsedPreferences} />
+          </div>
+        )}
+
+        {nlSuccess && (
+          <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
+            <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Form filled! Review and adjust below, then click "Find Cities"
+            </p>
+          </div>
+        )}
+
+        {!showNLInput && !nlSuccess && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Or fill out the form manually below
+          </p>
+        )}
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Salary Input */}
         <div>
