@@ -8,6 +8,7 @@ LiveBetter ranks U.S. metropolitan areas by affordability using real data from a
 
 ## Features
 
+- **Natural Language Search**: Describe your preferences in plain English and let AI fill out the form for you
 - **Real Production Data**: Zillow rent prices, BEA cost-of-living indices, Census population
 - **Transparent Cost Breakdown**: See rent, utilities, groceries, and transport costs
 - **Transportation Mode Options**: Customize for public transit, car ownership, or bike/walk lifestyle
@@ -122,11 +123,16 @@ Get free API keys from these services:
 3. **EPA AirNow (Optional)**: https://docs.airnowapi.org/account/request/
    - For air quality data (currently not used in rankings)
 
+4. **OpenAI (Optional, for Natural Language Search)**: https://platform.openai.com/api-keys
+   - Enables users to describe preferences in plain English
+   - Uses GPT-4o-mini (~$0.00015 per request)
+
 Add keys to `.env`:
 ```bash
 BEA_API_KEY=your_bea_api_key_here
 CENSUS_API_KEY=your_census_key_here  # Optional
 AIRNOW_API_KEY=your_airnow_key_here  # Optional
+OPENAI_API_KEY=your_openai_key_here  # Optional - for natural language search
 ```
 
 ## Data Setup
@@ -406,6 +412,7 @@ Or connect GitHub repo to Vercel for automatic deployments.
 - [x] Accurate tax calculations
 - [x] Interactive map
 - [x] Transportation mode preferences (public transit, car, bike/walk)
+- [x] Natural language preference parsing with AI
 - [ ] Automate Zillow data updates (if API becomes available)
 - [ ] Enhanced quality-of-life metrics (schools, crime, weather, healthcare)
 - [ ] User authentication and saved searches
