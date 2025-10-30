@@ -142,7 +142,7 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
             Parsing...
           </span>
         ) : (
-          'Fill Form from Description'
+          'Find Cities from Description'
         )}
       </button>
 
