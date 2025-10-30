@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo, Suspense } from 'react';
+import React from 'react';
 import { rankMetros } from '@/lib/api';
 import type { Metro, SortField, SortDirection, RankRequest } from '@/types';
 import { CityCard } from '@/components/CityCard';
@@ -15,6 +16,48 @@ function ResultsContent() {
   const [sortField, setSortField] = useState<SortField>('score');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [showMap, setShowMap] = useState(true);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Isolate scroll events between city list and page
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleMouseEnter = () => {
+      // CANCEL any ongoing scroll animation on the page
+      const currentScrollY = window.scrollY;
+      window.scrollTo(0, currentScrollY);
+
+      // Hide page scrollbar
+      document.documentElement.style.overflow = 'hidden';
+    };
+
+    const handleMouseLeave = () => {
+      // Show page scrollbar again
+      document.documentElement.style.overflow = '';
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      // Prevent page scroll entirely when cursor is over city list
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Manually scroll the container
+      container.scrollTop += e.deltaY;
+    };
+
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('wheel', handleWheel);
+      // Clean up
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
 
   // Parse request from URL params
   const request: RankRequest = {
@@ -127,7 +170,7 @@ function ResultsContent() {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen" style={{ scrollBehavior: 'auto' }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -201,7 +244,11 @@ function ResultsContent() {
         {/* Split Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* City Cards List */}
-          <div className="space-y-4 custom-scrollbar overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          <div
+            ref={scrollContainerRef}
+            className="space-y-4 custom-scrollbar overflow-y-auto overflow-x-hidden"
+            style={{ maxHeight: 'calc(100vh - 250px)', overscrollBehavior: 'contain' }}
+          >
             {sortedMetros.map((metro, idx) => (
               <div
                 key={metro.metro_id}

@@ -18,6 +18,10 @@
   body {
     @apply bg-[var(--background)] text-[var(--foreground)];
   }
+
+  html {
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer components {
