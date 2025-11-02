@@ -99,8 +99,8 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-white dark:to-gray-800"></div>
 
         {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-4 py-16">
-          <div className="text-center mb-16 max-w-4xl mx-auto">
+        <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
+          <div className="text-center mb-24 md:mb-32 max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 min-h-[4rem]">
             <TypingAnimation
               text="Find your perfect city"
