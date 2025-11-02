@@ -146,19 +146,18 @@ export default function Home() {
       {/* Feature Highlights - Timeline */}
       <div className="bg-gradient-to-b from-white via-primary-50 to-white dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto relative">
+          <div className="max-w-7xl mx-auto relative">
             {/* Vertical connecting line */}
             <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-primary-300 dark:via-primary-700 to-transparent hidden md:block timeline-line"></div>
 
             {/* Feature 1 - Left aligned */}
             <div className="relative mb-20 feature-block" data-direction="left">
-              <div className="md:w-1/2 md:pr-12 text-left md:text-right feature-content">
-                <h3 className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-4">
+              <div className="md:w-[52%] md:pr-12 text-left md:text-right feature-content">
+                <h3 className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-400 mb-6 tracking-wider">
                   Real Market Data
                 </h3>
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Rankings based on actual median rent prices from Zillow, regional price parities from the Bureau of Economic Analysis,
-                  and up-to-date population data from the Census Bureau
+                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-snug tracking-wider">
+                  Rankings based on actual median rent prices from Zillow, regional price parities from the Bureau of Economic Analysis, and up-to-date population data from the Census Bureau
                 </p>
               </div>
               {/* Timeline dot */}
@@ -167,13 +166,12 @@ export default function Home() {
 
             {/* Feature 2 - Right aligned */}
             <div className="relative mb-20 feature-block" data-direction="right">
-              <div className="md:w-1/2 md:ml-auto md:pl-12 text-left feature-content">
-                <h3 className="text-3xl font-bold text-accent-600 dark:text-accent-400 mb-4">
+              <div className="md:w-[52%] md:ml-auto md:pl-12 text-left feature-content">
+                <h3 className="text-3xl md:text-4xl font-bold text-accent-600 dark:text-accent-400 mb-6 tracking-wider">
                   Transparent Breakdown
                 </h3>
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  See exactly how your money is allocated across rent, utilities, groceries, and transportation.
-                  Know your discretionary income after essential expenses in each city
+                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-snug tracking-wider">
+                  See exactly how your money is allocated across rent, utilities, groceries, and transportation. Know your discretionary income after essential expenses in each city
                 </p>
               </div>
               {/* Timeline dot */}
@@ -182,13 +180,12 @@ export default function Home() {
 
             {/* Feature 3 - Left aligned */}
             <div className="relative mb-20 feature-block" data-direction="left">
-              <div className="md:w-1/2 md:pr-12 text-left md:text-right feature-content">
-                <h3 className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-4">
+              <div className="md:w-[52%] md:pr-12 text-left md:text-right feature-content">
+                <h3 className="text-3xl md:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-6 tracking-wider">
                   Transportation Modes
                 </h3>
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Customize rankings based on your lifestyle: public transit user, car owner, or bike/walk enthusiast.
-                  Cities are adjusted for walkability and transit quality
+                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-snug tracking-wider">
+                  Customize rankings based on your lifestyle: public transit user, car owner, or bike/walk enthusiast. Cities are adjusted for walkability and transit quality
                 </p>
               </div>
               {/* Timeline dot */}
@@ -197,13 +194,12 @@ export default function Home() {
 
             {/* Feature 4 - Right aligned */}
             <div className="relative feature-block" data-direction="right">
-              <div className="md:w-1/2 md:ml-auto md:pl-12 text-left feature-content">
-                <h3 className="text-3xl font-bold text-green-600 dark:text-green-400 mb-4">
+              <div className="md:w-[52%] md:ml-auto md:pl-12 text-left feature-content">
+                <h3 className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-400 mb-6 tracking-wider">
                   Quality of Life Factors
                 </h3>
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Prioritize what matters most to you: weather, school quality, safety, healthcare, walkability, and air quality.
-                  Customize weights to create your personalized ranking
+                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-snug tracking-wider">
+                  Prioritize what matters most to you: weather, school quality, safety, healthcare, walkability, and air quality. Customize weights to create your personalized ranking
                 </p>
               </div>
               {/* Timeline dot */}
