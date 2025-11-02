@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div className="min-h-[calc(100vh-180px)]">
       {/* Hero Section with City Images Background */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden min-h-[600px] md:min-h-[700px]">
         {/* Background - 3 City Images */}
         <div className="absolute inset-0 grid grid-cols-3 gap-2">
           {/* City Image 1 */}
@@ -99,9 +99,9 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-white dark:to-gray-800"></div>
 
         {/* Hero Content */}
-        <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
-          <div className="text-center mb-24 md:mb-32 max-w-4xl mx-auto">
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 min-h-[4rem]">
+        <div className="relative z-10 container mx-auto px-4 py-24 md:py-32 h-full flex items-center">
+          <div className="text-center mb-24 md:mb-32 max-w-4xl mx-auto w-full">
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 h-[4.5rem] md:h-[5.5rem] flex items-center justify-center">
             <TypingAnimation
               text="Find your perfect city"
               speed={50}
