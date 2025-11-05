@@ -44,6 +44,9 @@ export function FormCard() {
     setShowNLInput(false);
     setIsSubmitting(true);
 
+    // Save as last search
+    localStorage.setItem('livebetter_last_search', JSON.stringify(parsed));
+
     // Brief delay for visual feedback
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -65,14 +68,26 @@ export function FormCard() {
     router.push(`/results?${params.toString()}`);
   };
 
-  // Load saved searches from localStorage on mount
+  // Load saved searches and last search from localStorage on mount
   useEffect(() => {
+    // Load saved searches
     const saved = localStorage.getItem('livebetter_searches');
     if (saved) {
       try {
         setSavedSearches(JSON.parse(saved));
       } catch (e) {
         console.error('Failed to parse saved searches:', e);
+      }
+    }
+
+    // Load last search parameters
+    const lastSearch = localStorage.getItem('livebetter_last_search');
+    if (lastSearch) {
+      try {
+        const parsed = JSON.parse(lastSearch);
+        setFormData(parsed);
+      } catch (e) {
+        console.error('Failed to parse last search:', e);
       }
     }
   }, []);
@@ -179,6 +194,9 @@ export function FormCard() {
     e.preventDefault();
     if (validateForm()) {
       setIsSubmitting(true);
+
+      // Save as last search
+      localStorage.setItem('livebetter_last_search', JSON.stringify(formData));
 
       // Brief delay for visual feedback
       await new Promise(resolve => setTimeout(resolve, 300));
