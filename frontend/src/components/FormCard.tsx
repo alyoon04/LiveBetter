@@ -25,7 +25,7 @@ export function FormCard() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showNLInput, setShowNLInput] = useState(true);
+  const [showNLInput, setShowNLInput] = useState(false);
   const [nlSuccess, setNlSuccess] = useState(false);
 
   const handleParsedPreferences = async (parsed: RankRequest) => {
@@ -53,6 +53,18 @@ export function FormCard() {
       walkability_weight: parsed.walkability_weight.toString(),
     });
     router.push(`/results?${params.toString()}`);
+  };
+
+  // Format number with commas
+  const formatNumber = (num: number): string => {
+    if (num === 0) return '';
+    return num.toLocaleString('en-US');
+  };
+
+  // Parse formatted number string to integer
+  const parseFormattedNumber = (str: string): number => {
+    if (str === '') return 0;
+    return parseInt(str.replace(/,/g, ''), 10);
   };
 
   const validateForm = (): boolean => {
@@ -161,19 +173,17 @@ export function FormCard() {
               $
             </span>
             <input
-              type="number"
+              type="text"
               id="salary"
-              value={formData.salary === 0 ? '' : formData.salary}
+              value={formatNumber(formData.salary)}
               onChange={(e) => {
-                const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                const value = parseFormattedNumber(e.target.value);
                 setFormData({ ...formData, salary: value });
               }}
               onFocus={(e) => e.target.select()}
               className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500"
-              placeholder="90000"
-              min="10000"
-              max="1000000"
-              step="1000"
+              placeholder="90,000"
+              inputMode="numeric"
             />
           </div>
           {errors.salary && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.salary}</p>}
