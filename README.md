@@ -8,15 +8,17 @@ LiveBetter ranks U.S. metropolitan areas by affordability using real data from a
 
 ## Features
 
-- **Natural Language Search**: Describe your preferences in plain English and let AI fill out the form for you
-- **Real Production Data**: Zillow rent prices, BEA cost-of-living indices, Census population
-- **Transparent Cost Breakdown**: See rent, utilities, groceries, and transport costs
-- **Transportation Mode Options**: Customize for public transit, car ownership, or bike/walk lifestyle
-- **After-Tax Calculations**: Accurate federal and state tax estimates
-- **Regional Cost Adjustments**: RPP-adjusted purchasing power
-- **Interactive Map**: Visual exploration with Leaflet
-- **Dark Mode**: Automatic theme switching
-- **Responsive Design**: Works on desktop and mobile
+- **AI-Powered Natural Language Search**: Describe your preferences in plain English (e.g., "I make $75k, family of 3, need good schools") and the system automatically fills the form using GPT-4o-mini
+- **Real Production Data**: Zillow rent prices (updated quarterly), BEA Regional Price Parities, Census population estimates
+- **Transparent Cost Breakdown**: See detailed monthly costs: rent, utilities, groceries, and transport
+- **Transportation Mode Options**: Customize for public transit, car ownership, or bike/walk lifestyle with mode-specific cost calculations
+- **After-Tax Calculations**: Accurate federal and state income tax estimates with regional adjustments
+- **Regional Cost Adjustments**: RPP-adjusted purchasing power (accounts for how far your dollar goes)
+- **Interactive Color-Coded Map**: Visual exploration with Leaflet showing affordability ranges (green: highly affordable, red: less affordable)
+- **Quality of Life Weighting**: Prioritize what matters to you - affordability, schools, safety, weather, healthcare, walkability
+- **Intelligent Caching**: Redis-based caching with in-memory fallback for fast response times
+- **Dark Mode**: Automatic theme switching with system preference detection
+- **Responsive Design**: Optimized for desktop and mobile
 
 ## Tech Stack
 
@@ -29,6 +31,8 @@ LiveBetter ranks U.S. metropolitan areas by affordability using real data from a
 ### Backend
 - **FastAPI** (Python 3.11+) with Pydantic validation
 - **PostgreSQL** 14+ for data storage
+- **Redis** for caching (optional, falls back to in-memory cache)
+- **OpenAI API** (GPT-4o-mini) for natural language parsing
 - **Uvicorn** ASGI server
 
 ### Data Sources
@@ -110,29 +114,36 @@ Frontend will be available at http://localhost:3000
 
 ## API Keys
 
-Get free API keys from these services:
+Get API keys from these services:
 
 1. **BEA (Required)**: https://apps.bea.gov/API/signup/
    - Provides Regional Price Parity data (cost-of-living indices)
    - Activation takes ~24 hours after email confirmation
 
-2. **Census Bureau (Optional)**: https://api.census.gov/data/key_signup.html
+2. **OpenAI (Recommended for Natural Language Search)**: https://platform.openai.com/api-keys
+   - Enables users to describe preferences in plain English
+   - Uses GPT-4o-mini (~$0.00015 per request, extremely cost-effective)
+   - Falls back to rule-based parser if not configured
+
+3. **Census Bureau (Optional)**: https://api.census.gov/data/key_signup.html
    - For updating population data
    - Rate limited to ~500 requests/day
 
-3. **EPA AirNow (Optional)**: https://docs.airnowapi.org/account/request/
-   - For air quality data (currently not used in rankings)
-
-4. **OpenAI (Optional, for Natural Language Search)**: https://platform.openai.com/api-keys
-   - Enables users to describe preferences in plain English
-   - Uses GPT-4o-mini (~$0.00015 per request)
+4. **EPA AirNow (Optional)**: https://docs.airnowapi.org/account/request/
+   - For air quality data (experimental feature)
 
 Add keys to `.env`:
 ```bash
 BEA_API_KEY=your_bea_api_key_here
+OPENAI_API_KEY=your_openai_key_here  # Recommended - enables AI-powered search
 CENSUS_API_KEY=your_census_key_here  # Optional
 AIRNOW_API_KEY=your_airnow_key_here  # Optional
-OPENAI_API_KEY=your_openai_key_here  # Optional - for natural language search
+
+# Optional: Redis caching configuration
+REDIS_ENABLED=true  # Set to false to use in-memory cache
+REDIS_HOST=localhost
+REDIS_PORT=6379
+CACHE_TTL_HOURS=24
 ```
 
 ## Data Setup
@@ -174,16 +185,22 @@ LiveBetter/
 ├── api/                          # FastAPI backend
 │   ├── main.py                   # FastAPI app entry point
 │   ├── models.py                 # Pydantic request/response models
-│   ├── scoring.py                # Affordability scoring logic
-│   ├── db.py                     # Database layer
+│   ├── scoring.py                # Affordability & QOL scoring logic
+│   ├── db.py                     # Database connection & queries
+│   ├── cache.py                  # Redis caching with in-memory fallback
 │   ├── schema.sql                # PostgreSQL schema
 │   ├── clients/                  # External API clients
 │   │   ├── base.py              # Base client with rate limiting/caching
 │   │   ├── bea.py               # BEA RPP API
 │   │   ├── census.py            # Census API
-│   │   └── epa.py               # EPA AirNow API
+│   │   ├── weather.py           # Open-Meteo weather API
+│   │   ├── epa.py               # EPA AirNow API
+│   │   ├── zillow.py            # Zillow data utilities
+│   │   ├── wikipedia.py         # Wikipedia client (experimental)
+│   │   └── hud.py               # HUD API client (experimental)
 │   └── routers/
-│       └── rank.py              # /api/rank endpoint
+│       ├── rank.py              # /api/rank endpoint
+│       └── nl_parser.py         # /api/parse-preferences endpoint
 ├── etl/                         # Data loading scripts
 │   ├── seed_metros.py           # Load metros from CSV
 │   ├── load_real_data.py        # Load Zillow rents
@@ -195,11 +212,17 @@ LiveBetter/
 │   └── bea_marpp_sample.json    # Sample BEA response
 ├── frontend/                    # Next.js frontend
 │   ├── src/
-│   │   ├── app/                # App Router pages
+│   │   ├── app/                # App Router pages (/, /search, /results, /methodology)
 │   │   ├── components/         # React components
-│   │   ├── lib/                # API client
-│   │   └── types/              # TypeScript types
-│   └── public/
+│   │   │   ├── FormCard.tsx    # Main search form
+│   │   │   ├── NaturalLanguageInput.tsx  # AI-powered text input
+│   │   │   ├── MapView.tsx     # Interactive Leaflet map
+│   │   │   ├── CityCard.tsx    # Metro result card
+│   │   │   ├── ScoreBar.tsx    # Visual score indicator
+│   │   │   └── ThemeProvider.tsx  # Dark mode support
+│   │   ├── lib/                # API client & utilities
+│   │   └── types/              # TypeScript type definitions
+│   └── public/                 # Static assets (logo, images)
 ├── tests/                       # Backend tests
 │   └── test_scoring.py
 ├── .env.example                 # Environment template
@@ -208,9 +231,45 @@ LiveBetter/
 
 ## API Usage
 
+### POST /api/parse-preferences
+
+Parse natural language input into structured search parameters.
+
+**Request:**
+```json
+{
+  "text": "I make $75k with a family of 3, I prefer public transit and care about schools"
+}
+```
+
+**Response:**
+```json
+{
+  "salary": 75000,
+  "family_size": 3,
+  "rent_cap_pct": 0.3,
+  "population_min": 0,
+  "limit": 50,
+  "transport_mode": "public_transit",
+  "affordability_weight": 10,
+  "schools_weight": 8,
+  "safety_weight": 0,
+  "weather_weight": 0,
+  "healthcare_weight": 0,
+  "walkability_weight": 0
+}
+```
+
+**Features:**
+- Powered by GPT-4o-mini for accurate parsing
+- Falls back to rule-based parser if OpenAI API unavailable
+- Understands various salary formats: "75k", "$75000", "75,000"
+- Recognizes family descriptions: "single", "couple", "family of 4"
+- Maps importance levels: "very important" → 9-10, "important" → 7-8
+
 ### POST /api/rank
 
-Rank metros by affordability.
+Rank metros by affordability and quality of life.
 
 **Request:**
 ```json
@@ -322,14 +381,15 @@ The app calculates a 0-1 affordability score based on discretionary income:
    DI = Adjusted Net Income - (Rent + Utilities + Groceries + Transport)
    ```
 
-5. **Score** (sigmoid function):
+5. **Score** (linear normalization):
    ```
-   score = 1 / (1 + e^(-(DI - 1500) / 400))
+   score = (DI + 500) / 6500
    ```
-   - Centers around $1,500/month discretionary income
-   - Score 0.5 = $1,500 DI (breaking even comfortably)
-   - Score 0.9+ = $2,500+ DI (very affordable)
-   - Score 0.3 = $700 DI (tight budget)
+   - Range: -$500 (score 0) to +$6,000 (score 1)
+   - Score 0.5 = $2,750 DI (comfortable)
+   - Score 0.8+ = $4,700+ DI (very affordable)
+   - Score 0.3 = $1,450 DI (tight budget)
+   - Clamped to [0, 1] range
 
 ### Regional Price Parity (RPP)
 
@@ -374,6 +434,15 @@ DB_NAME=livebetter
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 BEA_API_KEY=your_bea_key
+
+# Recommended for Natural Language Search
+OPENAI_API_KEY=your_openai_key
+
+# Optional: Redis caching (improves performance)
+REDIS_ENABLED=true
+REDIS_HOST=your_redis_host  # Most platforms provide managed Redis
+REDIS_PORT=6379
+CACHE_TTL_HOURS=24
 ```
 
 **Deploy Steps**:
@@ -407,19 +476,31 @@ Or connect GitHub repo to Vercel for automatic deployments.
 
 ## Roadmap
 
-- [x] Real Zillow rent data
+### Completed ✓
+- [x] Real Zillow rent data integration
 - [x] BEA RPP integration
-- [x] Accurate tax calculations
-- [x] Interactive map
+- [x] Accurate federal and state tax calculations
+- [x] Interactive color-coded map
 - [x] Transportation mode preferences (public transit, car, bike/walk)
-- [x] Natural language preference parsing with AI
-- [ ] Automate Zillow data updates (if API becomes available)
-- [ ] Enhanced quality-of-life metrics (schools, crime, weather, healthcare)
+- [x] Natural language preference parsing with AI (GPT-4o-mini)
+- [x] Quality of life weighting system (affordability, schools, safety, weather, healthcare, walkability)
+- [x] Redis caching with in-memory fallback
+- [x] Dark mode support
+- [x] Responsive mobile-friendly design
+
+### In Progress 🚧
+- [ ] Enhanced weather data integration (API client implemented, needs UI)
+- [ ] Air quality metrics (EPA AirNow integration in progress)
+
+### Planned 📋
+- [ ] Automate Zillow data updates (blocked by lack of public API)
 - [ ] User authentication and saved searches
-- [ ] Healthcare cost estimates
+- [ ] Healthcare cost estimates (HUD client in development)
 - [ ] Neighborhood-level data (vs metro-level)
-- [ ] Historical trend analysis
+- [ ] Historical trend analysis and price forecasting
 - [ ] Transit quality scores and public transit coverage data
+- [ ] Cost of living comparison tool (side-by-side metros)
+- [ ] Email alerts for rent price changes
 
 ## Contributing
 

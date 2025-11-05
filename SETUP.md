@@ -187,14 +187,27 @@ cp .env.example .env
 nano .env  # or use your preferred editor
 ```
 
-Edit the values if needed:
+Edit the values:
 ```
+# Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=livebetter
 DB_USER=postgres
 DB_PASSWORD=postgres  # Change if you set a different password
+
+# API Keys
+BEA_API_KEY=your_bea_key_here  # Required - get from https://apps.bea.gov/API/signup/
+OPENAI_API_KEY=your_openai_key_here  # Recommended - enables AI-powered natural language search
+
+# Optional: Redis caching (improves performance)
+REDIS_ENABLED=true
+REDIS_HOST=localhost
+REDIS_PORT=6379
+CACHE_TTL_HOURS=24
 ```
+
+**Note**: If you don't set `OPENAI_API_KEY`, the natural language search will fall back to a basic rule-based parser.
 
 ### Step 4: Run ETL Scripts to Load Data
 
@@ -234,6 +247,27 @@ psql -U postgres -d livebetter -c "SELECT COUNT(*) FROM metro_costs;"
 # View sample data
 psql -U postgres -d livebetter -c "SELECT m.name, m.state, mc.median_rent_usd, mc.rpp_index FROM metro m JOIN metro_costs mc ON m.metro_id = mc.metro_id LIMIT 5;"
 ```
+
+### Step 5a: Optional - Set Up Redis for Caching
+
+For improved performance, you can install Redis:
+
+**macOS:**
+```bash
+brew install redis
+brew services start redis
+```
+
+**Ubuntu/Linux:**
+```bash
+sudo apt install redis-server
+sudo systemctl start redis
+```
+
+**Windows:**
+Download from https://redis.io/download or use WSL
+
+If you skip Redis, the app will automatically use in-memory caching.
 
 ### Step 6: Start FastAPI Server
 
@@ -352,20 +386,30 @@ You should see:
 
 ## Testing the Application
 
-### 1. Test the Form Submission
+### 1. Test Natural Language Search (if OpenAI API key configured)
 
-1. On the home page, enter:
+1. On the search page, find the "Describe your preferences" section
+2. Enter a natural language query, for example:
+   - "I make $75k with a family of 3, I prefer public transit and care about schools"
+   - "Single person, $120k salary, want walkable city"
+3. The form should auto-fill based on your description
+4. Review the filled values and click "Find Cities"
+
+### 2. Test Manual Form Submission
+
+1. On the search page, use the manual form fields:
    - Salary: 90000
    - Household Size: 2
    - Maximum Rent: 30%
    - Minimum City Size: Any size
+   - Transport Mode: Public Transit
 
 2. Click "Find Cities"
 
 3. You should be redirected to the results page showing:
    - Top ranked cities
    - Interactive map with markers
-   - City cards with affordability scores
+   - City cards with affordability scores and cost breakdowns
 
 ### 2. Test Sorting
 

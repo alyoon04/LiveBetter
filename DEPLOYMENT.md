@@ -85,27 +85,48 @@ gh repo create LiveBetter --private --source=. --remote=origin --push
    - Select "Database" → "Add PostgreSQL"
    - Railway will provision a database
 
-4. **Configure Backend Service**
+4. **Add Redis (Optional but Recommended)**
+   - In your project, click "New"
+   - Select "Database" → "Add Redis"
+   - Railway will provision a Redis instance
+
+5. **Configure Backend Service**
    - Click on your service (Python app)
    - Go to "Variables" tab
    - Add these variables:
      ```
+     # Database
      DB_HOST=${{Postgres.PGHOST}}
      DB_PORT=${{Postgres.PGPORT}}
      DB_NAME=${{Postgres.PGDATABASE}}
      DB_USER=${{Postgres.PGUSER}}
      DB_PASSWORD=${{Postgres.PGPASSWORD}}
+
+     # Required API Keys
+     BEA_API_KEY=<your-bea-api-key>
+
+     # Recommended: Enables AI-powered natural language search
+     OPENAI_API_KEY=<your-openai-api-key>
+
+     # Optional: Redis caching (if you added Redis in step 4)
+     REDIS_ENABLED=true
+     REDIS_HOST=${{Redis.REDIS_HOST}}
+     REDIS_PORT=${{Redis.REDIS_PORT}}
+     CACHE_TTL_HOURS=24
+
+     # Optional: Other API keys
      CENSUS_API_KEY=<your-census-key-if-any>
+     AIRNOW_API_KEY=<your-airnow-key-if-any>
      ```
 
-5. **Set Start Command**
+6. **Set Start Command**
    - Go to "Settings" tab
    - Under "Deploy", set custom start command:
      ```
      cd api && uvicorn main:app --host 0.0.0.0 --port $PORT
      ```
 
-6. **Deploy**
+7. **Deploy**
    - Railway will automatically build and deploy
    - Wait for deployment to complete (green checkmark)
 
@@ -259,11 +280,28 @@ git push origin main
 
 ### Backend (Railway)
 ```bash
+# Database (Required)
 DB_HOST=${{Postgres.PGHOST}}
 DB_PORT=${{Postgres.PGPORT}}
 DB_NAME=${{Postgres.PGDATABASE}}
 DB_USER=${{Postgres.PGUSER}}
 DB_PASSWORD=${{Postgres.PGPASSWORD}}
+
+# API Keys (Required)
+BEA_API_KEY=your_bea_api_key
+
+# Natural Language Search (Recommended)
+OPENAI_API_KEY=your_openai_api_key
+
+# Redis Caching (Optional but Recommended)
+REDIS_ENABLED=true
+REDIS_HOST=${{Redis.REDIS_HOST}}
+REDIS_PORT=${{Redis.REDIS_PORT}}
+CACHE_TTL_HOURS=24
+
+# Other Optional Keys
+CENSUS_API_KEY=your_census_key
+AIRNOW_API_KEY=your_airnow_key
 ```
 
 ### Frontend (Vercel)
@@ -384,13 +422,16 @@ npm run build
 
 ### Free Tier (Hobby Project)
 - **Railway:** $5/month (500 hours + PostgreSQL)
+  - Add Redis: +$3/month (optional but recommended for caching)
 - **Vercel:** Free (100GB bandwidth, unlimited requests)
-- **Total:** ~$5/month
+- **OpenAI API:** ~$0.50-2/month (GPT-4o-mini for natural language parsing, extremely cost-effective)
+- **Total:** ~$6-10/month
 
 ### Paid Tier (Production)
-- **Railway:** $20/month (Pro plan with better resources)
+- **Railway:** $20/month (Pro plan with better resources + PostgreSQL + Redis)
 - **Vercel:** $20/month (Pro plan with analytics)
-- **Total:** ~$40/month
+- **OpenAI API:** ~$5-20/month (scales with usage, GPT-4o-mini is very cheap)
+- **Total:** ~$45-60/month
 
 ---
 
@@ -432,26 +473,34 @@ npm run build
 
 ## Next Steps After Deployment
 
-1. **Add Analytics**
+1. **Verify Features**
+   - Test natural language search functionality (if OpenAI key configured)
+   - Verify Redis caching is working (check Railway logs for cache hits)
+   - Test all transportation modes and quality of life filters
+
+2. **Add Analytics**
    - Vercel Analytics for frontend metrics
    - Railway metrics for backend monitoring
+   - Track natural language query usage and accuracy
 
-2. **Set up Monitoring**
+3. **Set up Monitoring**
    - Railway alerts for downtime
    - Error tracking (Sentry)
+   - Monitor OpenAI API usage and costs
 
-3. **Performance Optimization**
-   - Enable caching on popular endpoints
-   - Add database indexes
-   - Optimize API queries
+4. **Performance Optimization**
+   - Verify Redis caching is reducing database queries
+   - Add database indexes for frequently queried columns
+   - Monitor cache hit/miss rates
 
-4. **Backup Database**
-   - Railway provides automatic backups
-   - Can also set up manual backups
+5. **Backup Database**
+   - Railway provides automatic PostgreSQL backups
+   - Export Redis data periodically if using for critical caching
 
-5. **Custom Domain**
+6. **Custom Domain**
    - Purchase domain (Namecheap, Google Domains)
    - Configure DNS as described above
+   - Update CORS settings in api/main.py to match your domain
 
 ---
 
