@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import type { RankRequest } from '@/types';
 import { NaturalLanguageInput } from './NaturalLanguageInput';
 
+interface SavedSearch {
+  id: string;
+  name: string;
+  timestamp: number;
+  data: RankRequest;
+}
+
 export function FormCard() {
   const router = useRouter();
   const [formData, setFormData] = useState<RankRequest>({
@@ -27,6 +34,9 @@ export function FormCard() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showNLInput, setShowNLInput] = useState(false);
   const [nlSuccess, setNlSuccess] = useState(false);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [showSavedSearches, setShowSavedSearches] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleParsedPreferences = async (parsed: RankRequest) => {
     setFormData(parsed);
@@ -55,6 +65,31 @@ export function FormCard() {
     router.push(`/results?${params.toString()}`);
   };
 
+  // Load saved searches from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('livebetter_searches');
+    if (saved) {
+      try {
+        setSavedSearches(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse saved searches:', e);
+      }
+    }
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showSavedSearches && !target.closest('.saved-searches-dropdown')) {
+        setShowSavedSearches(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSavedSearches]);
+
   // Format number with commas
   const formatNumber = (num: number): string => {
     if (num === 0) return '';
@@ -65,6 +100,62 @@ export function FormCard() {
   const parseFormattedNumber = (str: string): number => {
     if (str === '') return 0;
     return parseInt(str.replace(/,/g, ''), 10);
+  };
+
+  // Generate a descriptive name for the search
+  const generateSearchName = (data: RankRequest): string => {
+    const salaryK = Math.round(data.salary / 1000);
+    const familyText = data.family_size === 1 ? 'Single' : `Family of ${data.family_size}`;
+    const modeText = data.transport_mode === 'public_transit' ? 'Transit' :
+                     data.transport_mode === 'car' ? 'Car' : 'Bike/Walk';
+    return `$${salaryK}k ${familyText} · ${modeText}`;
+  };
+
+  // Save current search
+  const handleSaveSearch = () => {
+    const newSearch: SavedSearch = {
+      id: Date.now().toString(),
+      name: generateSearchName(formData),
+      timestamp: Date.now(),
+      data: { ...formData },
+    };
+
+    const updatedSearches = [newSearch, ...savedSearches].slice(0, 5); // Keep max 5
+    setSavedSearches(updatedSearches);
+    localStorage.setItem('livebetter_searches', JSON.stringify(updatedSearches));
+
+    // Show success message
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2000);
+  };
+
+  // Load a saved search
+  const handleLoadSearch = (search: SavedSearch) => {
+    setFormData(search.data);
+    setShowSavedSearches(false);
+  };
+
+  // Delete a saved search
+  const handleDeleteSearch = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updatedSearches = savedSearches.filter(s => s.id !== id);
+    setSavedSearches(updatedSearches);
+    localStorage.setItem('livebetter_searches', JSON.stringify(updatedSearches));
+  };
+
+  // Format timestamp for display
+  const formatTimestamp = (timestamp: number): string => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(timestamp).toLocaleDateString();
   };
 
   const validateForm = (): boolean => {
@@ -113,6 +204,90 @@ export function FormCard() {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card p-8 max-w-2xl mx-auto backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+      {/* Save/Load Controls */}
+      <div className="mb-6 flex gap-2 justify-end">
+        {/* Save Search Button */}
+        <button
+          type="button"
+          onClick={handleSaveSearch}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          Save Search
+        </button>
+
+        {/* Load Search Dropdown */}
+        {savedSearches.length > 0 && (
+          <div className="relative saved-searches-dropdown">
+            <button
+              type="button"
+              onClick={() => setShowSavedSearches(!showSavedSearches)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Recent ({savedSearches.length})
+              <svg className={`w-4 h-4 transition-transform ${showSavedSearches ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showSavedSearches && (
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-10 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 px-2">RECENT SEARCHES</p>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {savedSearches.map((search) => (
+                    <button
+                      key={search.id}
+                      onClick={() => handleLoadSearch(search)}
+                      className="w-full text-left px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 group"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {search.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {formatTimestamp(search.timestamp)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteSearch(search.id, e)}
+                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Delete"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Save Success Message */}
+      {saveSuccess && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
+          <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Search saved successfully!
+          </p>
+        </div>
+      )}
+
       {/* Natural Language Input Section - Collapsible */}
       <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
         <button
