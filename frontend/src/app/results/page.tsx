@@ -8,6 +8,7 @@ import { rankMetros } from '@/lib/api';
 import type { Metro, SortField, SortDirection, RankRequest } from '@/types';
 import { CityCard } from '@/components/CityCard';
 import { MapView } from '@/components/MapView';
+import { CompareBar } from '@/components/CompareBar';
 import Link from 'next/link';
 
 function ResultsContent() {
@@ -16,7 +17,31 @@ function ResultsContent() {
   const [sortField, setSortField] = useState<SortField>('score');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [showMap, setShowMap] = useState(true);
+  const [selectedMetros, setSelectedMetros] = useState<Metro[]>([]);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleToggleSelect = (metro: Metro) => {
+    setSelectedMetros(prev => {
+      const isSelected = prev.some(m => m.metro_id === metro.metro_id);
+      if (isSelected) {
+        return prev.filter(m => m.metro_id !== metro.metro_id);
+      } else {
+        // Max 4 cities
+        if (prev.length >= 4) {
+          return prev;
+        }
+        return [...prev, metro];
+      }
+    });
+  };
+
+  const handleRemoveFromCompare = (metroId: number) => {
+    setSelectedMetros(prev => prev.filter(m => m.metro_id !== metroId));
+  };
+
+  const handleClearCompare = () => {
+    setSelectedMetros([]);
+  };
 
   // Isolate scroll events between city list and page
   React.useEffect(() => {
@@ -262,6 +287,8 @@ function ResultsContent() {
                   metro={metro}
                   rank={idx + 1}
                   onHover={setHoveredMetro}
+                  isSelected={selectedMetros.some(m => m.metro_id === metro.metro_id)}
+                  onToggleSelect={handleToggleSelect}
                 />
               </div>
             ))}
@@ -276,6 +303,13 @@ function ResultsContent() {
           </div>
         </div>
       </div>
+
+      {/* Comparison Bar */}
+      <CompareBar
+        selectedMetros={selectedMetros}
+        onRemove={handleRemoveFromCompare}
+        onClear={handleClearCompare}
+      />
     </div>
   );
 }

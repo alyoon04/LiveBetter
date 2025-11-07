@@ -8,9 +8,11 @@ interface CityCardProps {
   metro: Metro;
   rank: number;
   onHover?: (metro: Metro | null) => void;
+  isSelected?: boolean;
+  onToggleSelect?: (metro: Metro) => void;
 }
 
-export function CityCard({ metro, rank, onHover }: CityCardProps) {
+export function CityCard({ metro, rank, onHover, isSelected, onToggleSelect }: CityCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const formatCurrency = (amount: number) => {
@@ -35,12 +37,27 @@ export function CityCard({ metro, rank, onHover }: CityCardProps) {
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 p-6 border border-gray-100 dark:border-gray-700 transform hover:-translate-y-2 hover:scale-[1.02] cursor-pointer"
+      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 p-6 border transform hover:-translate-y-2 hover:scale-[1.02] cursor-pointer ${
+        isSelected
+          ? 'border-primary-500 dark:border-primary-400 border-2 shadow-lg'
+          : 'border-gray-100 dark:border-gray-700'
+      }`}
       onMouseEnter={() => onHover?.(metro)}
       onMouseLeave={() => onHover?.(null)}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
+        {onToggleSelect && (
+          <label className="flex items-center cursor-pointer mr-3">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelect(metro)}
+              className="w-5 h-5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </label>
+        )}
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-bold text-sm">

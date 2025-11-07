@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=env_path)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import rank, nl_parser
+from routers import rank, nl_parser, metros
 from models import HealthResponse
 from db import db
 from cache import cache
@@ -66,6 +66,7 @@ app.add_middleware(
 # Include routers
 app.include_router(rank.router, prefix="/api", tags=["ranking"])
 app.include_router(nl_parser.router, prefix="/api", tags=["natural-language"])
+app.include_router(metros.router, prefix="/api", tags=["metros"])
 
 
 @app.get("/", tags=["health"])
