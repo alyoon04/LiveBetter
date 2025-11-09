@@ -10,9 +10,10 @@ interface CityCardProps {
   onHover?: (metro: Metro | null) => void;
   isSelected?: boolean;
   onToggleSelect?: (metro: Metro) => void;
+  isDisabled?: boolean;
 }
 
-export function CityCard({ metro, rank, onHover, isSelected, onToggleSelect }: CityCardProps) {
+export function CityCard({ metro, rank, onHover, isSelected, onToggleSelect, isDisabled }: CityCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const formatCurrency = (amount: number) => {
@@ -50,13 +51,19 @@ export function CityCard({ metro, rank, onHover, isSelected, onToggleSelect }: C
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onToggleSelect(metro);
+            if (!isDisabled || isSelected) {
+              onToggleSelect(metro);
+            }
           }}
-          className={`absolute top-4 right-4 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 ${
+          disabled={isDisabled && !isSelected}
+          className={`absolute top-4 right-4 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
             isSelected
-              ? 'bg-primary-600 text-white shadow-md hover:bg-primary-700'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              ? 'bg-primary-600 text-white shadow-md hover:bg-primary-700 hover:scale-105 active:scale-95'
+              : isDisabled
+              ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105 active:scale-95'
           }`}
+          title={isDisabled && !isSelected ? 'Maximum 4 cities can be selected for comparison' : ''}
         >
           <svg
             className="w-4 h-4"
