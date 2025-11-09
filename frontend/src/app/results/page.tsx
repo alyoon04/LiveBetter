@@ -28,6 +28,8 @@ function ResultsContent() {
       } else {
         // Max 4 cities
         if (prev.length >= 4) {
+          // Visual feedback: shake the compare bar or show a toast
+          // For now, just prevent selection
           return prev;
         }
         return [...prev, metro];
@@ -289,6 +291,7 @@ function ResultsContent() {
                   onHover={setHoveredMetro}
                   isSelected={selectedMetros.some(m => m.metro_id === metro.metro_id)}
                   onToggleSelect={handleToggleSelect}
+                  isDisabled={selectedMetros.length >= 4 && !selectedMetros.some(m => m.metro_id === metro.metro_id)}
                 />
               </div>
             ))}
