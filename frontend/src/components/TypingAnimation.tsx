@@ -15,21 +15,15 @@ export function TypingAnimation({ text, className = '', speed = 50, delay = 0 }:
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    // Initial delay before starting
-    const initialDelay = setTimeout(() => {
-      if (currentIndex < text.length) {
-        const timeout = setTimeout(() => {
-          setDisplayedText(text.slice(0, currentIndex + 1));
-          setCurrentIndex(currentIndex + 1);
-        }, speed);
-
-        return () => clearTimeout(timeout);
-      } else {
-        setIsComplete(true);
-      }
-    }, delay);
-
-    return () => clearTimeout(initialDelay);
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(text.slice(0, currentIndex + 1));
+        setCurrentIndex(currentIndex + 1);
+      }, currentIndex === 0 ? delay : speed);
+      return () => clearTimeout(timeout);
+    } else if (currentIndex === text.length && text.length > 0) {
+      setIsComplete(true);
+    }
   }, [currentIndex, text, speed, delay]);
 
   return (

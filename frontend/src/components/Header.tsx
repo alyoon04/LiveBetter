@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Logo } from './Logo';
 
 export function Header() {
   return (
@@ -8,6 +9,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
+            <Logo size={36} />
             <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400">
               LiveBetter
             </h1>

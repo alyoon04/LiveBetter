@@ -138,6 +138,58 @@ class Database:
             cur.close()
             return count
 
+    def get_metros_by_ids(self, metro_ids: List[int]) -> List[MetroRow]:
+        """
+        Fetch specific metros by their IDs.
+
+        Args:
+            metro_ids: List of metro IDs to fetch
+
+        Returns:
+            List of MetroRow objects
+        """
+        if not metro_ids:
+            return []
+
+        with get_db_connection() as conn:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+
+            # Create placeholders for the IN clause
+            placeholders = ','.join(['%s'] * len(metro_ids))
+
+            query = f"""
+                SELECT
+                    m.metro_id,
+                    m.name,
+                    m.state,
+                    m.cbsa_code,
+                    m.lat,
+                    m.lon,
+                    m.population,
+                    mc.median_rent_usd,
+                    mc.rpp_index,
+                    mc.eff_tax_rate,
+                    mc.utilities_monthly,
+                    qol.school_score,
+                    qol.crime_rate,
+                    qol.weather_score,
+                    qol.healthcare_score,
+                    qol.walkability_score,
+                    qol.air_quality_index,
+                    qol.commute_time_mins
+                FROM metro m
+                INNER JOIN metro_costs mc ON m.metro_id = mc.metro_id
+                LEFT JOIN metro_quality_of_life qol ON m.metro_id = qol.metro_id
+                WHERE m.metro_id IN ({placeholders})
+                ORDER BY m.metro_id;
+            """
+
+            cur.execute(query, metro_ids)
+            rows = cur.fetchall()
+            cur.close()
+
+            return [MetroRow(dict(row)) for row in rows]
+
     def health_check(self) -> dict:
         """
         Perform a database health check.
