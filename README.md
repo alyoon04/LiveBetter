@@ -9,16 +9,17 @@ LiveBetter ranks U.S. metropolitan areas by affordability using real data from a
 ## Features
 
 - **AI-Powered Natural Language Search**: Describe your preferences in plain English (e.g., "I make $75k, family of 3, need good schools") and the system automatically fills the form using GPT-4o-mini
-- **Real Production Data**: Zillow rent prices (updated quarterly), BEA Regional Price Parities, Census population estimates
+- **Real Production Data**: Zillow rent prices, BEA Regional Price Parities, Census population estimates, and quality of life metrics
 - **Transparent Cost Breakdown**: See detailed monthly costs: rent, utilities, groceries, and transport
 - **Transportation Mode Options**: Customize for public transit, car ownership, or bike/walk lifestyle with mode-specific cost calculations
 - **After-Tax Calculations**: Accurate federal and state income tax estimates with regional adjustments
 - **Regional Cost Adjustments**: RPP-adjusted purchasing power (accounts for how far your dollar goes)
-- **Interactive Color-Coded Map**: Visual exploration with Leaflet showing affordability ranges (green: highly affordable, red: less affordable)
-- **Quality of Life Weighting**: Prioritize what matters to you - affordability, schools, safety, weather, healthcare, walkability
-- **Intelligent Caching**: Redis-based caching with in-memory fallback for fast response times
+- **Interactive Map with Split View**: Dual-pane interface with city cards on the left and synchronized map on the right
+- **Quality of Life Weighting**: Prioritize what matters to you - affordability, schools, safety, weather, healthcare, walkability (with composite scoring)
+- **Intelligent Caching**: Redis-based caching with automatic in-memory fallback for fast response times (< 100ms cached responses)
+- **Smooth Animations**: Typing animations on landing page, staggered card animations, and timeline scroll effects
 - **Dark Mode**: Automatic theme switching with system preference detection
-- **Responsive Design**: Optimized for desktop and mobile
+- **Responsive Design**: Optimized for desktop and mobile with isolated scroll containers
 
 ## Tech Stack
 
@@ -214,11 +215,14 @@ LiveBetter/
 │   ├── src/
 │   │   ├── app/                # App Router pages (/, /search, /results, /methodology)
 │   │   ├── components/         # React components
-│   │   │   ├── FormCard.tsx    # Main search form
+│   │   │   ├── FormCard.tsx    # Main search form with quality of life sliders
 │   │   │   ├── NaturalLanguageInput.tsx  # AI-powered text input
 │   │   │   ├── MapView.tsx     # Interactive Leaflet map
-│   │   │   ├── CityCard.tsx    # Metro result card
-│   │   │   ├── ScoreBar.tsx    # Visual score indicator
+│   │   │   ├── CityCard.tsx    # Metro result card with cost breakdown
+│   │   │   ├── ScoreBar.tsx    # Visual affordability indicator
+│   │   │   ├── TypingAnimation.tsx  # Landing page typing effect
+│   │   │   ├── Header.tsx      # Navigation header
+│   │   │   ├── Footer.tsx      # Footer component
 │   │   │   └── ThemeProvider.tsx  # Dark mode support
 │   │   ├── lib/                # API client & utilities
 │   │   └── types/              # TypeScript type definitions
@@ -391,6 +395,28 @@ The app calculates a 0-1 affordability score based on discretionary income:
    - Score 0.3 = $1,450 DI (tight budget)
    - Clamped to [0, 1] range
 
+### Quality of Life Scoring
+
+LiveBetter uses a composite scoring system that combines affordability with quality of life factors:
+
+1. **Component Normalization**: Each QOL metric is normalized to a 0-1 scale:
+   - **Schools**: 0-100 score (based on test scores, graduation rates)
+   - **Safety**: Crime rate per 100k (inverted: lower crime = higher score)
+   - **Weather**: 0-100 score (based on temperature, sunshine, precipitation)
+   - **Healthcare**: 0-100 score (access and quality metrics)
+   - **Walkability**: 0-100 Walk Score index
+
+2. **Weighted Composite Score**:
+   ```
+   Composite Score = (Affordability × W_afford + Schools × W_school + Safety × W_safety +
+                      Weather × W_weather + Healthcare × W_health + Walkability × W_walk) / Total_Weight
+   ```
+   - Default weights: Affordability=10, others=0 (pure affordability ranking)
+   - Users can adjust weights (0-10) to prioritize their preferences
+   - Missing data defaults to neutral score (0.5)
+
+3. **Affordability-First Approach**: If no QOL preferences are set, the composite score equals the affordability score, ensuring the tool works as a pure cost-of-living calculator by default.
+
 ### Regional Price Parity (RPP)
 
 RPP measures how much $100 buys in each metro compared to the national average:
@@ -406,11 +432,12 @@ RPP measures how much $100 buys in each metro compared to the national average:
 
 ## Current Data Coverage
 
-- **87 metros** with real rent data (Zillow, August 2025)
-- **87 metros** with RPP data (BEA, 2023)
-- **88 metros** total in database
-- Average rent: **$1,825/month**
-- RPP range: **0.856 to 1.182**
+- **88 metros** total in database (major U.S. metropolitan areas)
+- **Real rent data** from Zillow ZORI (median rent prices)
+- **RPP data** from BEA (2023 Regional Price Parities)
+- **Quality of life metrics** including school scores, crime rates, weather scores, healthcare scores, walkability scores, air quality, and commute times
+- Metro population range: ~100k to 20M+ residents
+- RPP range: **0.856** (McAllen, TX) to **1.182** (San Francisco, CA)
 
 ## Running Tests
 
@@ -472,7 +499,7 @@ Or connect GitHub repo to Vercel for automatic deployments.
 - **Tax calculations**: Simplified (standard deduction only, no itemized deductions)
 - **Cost estimates**: Metro-level averages (neighborhood variation not captured)
 - **Transport costs**: Estimated based on mode and city walkability (not personalized to individual commute)
-- **Quality-of-life factors**: Currently limited to walkability/commute metrics
+- **Quality-of-life data**: Limited availability for some metros; missing data defaults to neutral score (0.5)
 
 ## Roadmap
 
@@ -493,14 +520,16 @@ Or connect GitHub repo to Vercel for automatic deployments.
 - [ ] Air quality metrics (EPA AirNow integration in progress)
 
 ### Planned 📋
+- [ ] Complete quality of life data for all 88 metros (currently partial coverage)
 - [ ] Automate Zillow data updates (blocked by lack of public API)
 - [ ] User authentication and saved searches
 - [ ] Healthcare cost estimates (HUD client in development)
 - [ ] Neighborhood-level data (vs metro-level)
 - [ ] Historical trend analysis and price forecasting
 - [ ] Transit quality scores and public transit coverage data
-- [ ] Cost of living comparison tool (side-by-side metros)
+- [ ] Side-by-side metro comparison tool
 - [ ] Email alerts for rent price changes
+- [ ] Export results to PDF or CSV
 
 ## Contributing
 
