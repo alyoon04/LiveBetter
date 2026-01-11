@@ -38,6 +38,14 @@ export function FormCard() {
   const [showSavedSearches, setShowSavedSearches] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Real-time validation effect
+  useEffect(() => {
+    // Only validate if user has started interacting with form
+    if (formData.salary !== 90000 || formData.family_size !== 1) {
+      validateForm();
+    }
+  }, [formData.salary, formData.family_size]);
+
   const handleParsedPreferences = async (parsed: RankRequest) => {
     setFormData(parsed);
     setNlSuccess(true);
@@ -176,14 +184,22 @@ export function FormCard() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (formData.salary < 10000) {
+    // Salary validation
+    if (!formData.salary || formData.salary <= 0) {
+      newErrors.salary = 'Salary must be a positive number';
+    } else if (formData.salary < 10000) {
       newErrors.salary = 'Salary must be at least $10,000';
-    }
-    if (formData.salary > 1000000) {
+    } else if (formData.salary > 1000000) {
       newErrors.salary = 'Salary must be less than $1,000,000';
+    } else if (isNaN(formData.salary)) {
+      newErrors.salary = 'Please enter a valid number';
     }
-    if (formData.family_size < 1) {
-      newErrors.family_size = 'Family size must be at least 1';
+
+    // Family size validation
+    if (!formData.family_size || formData.family_size < 1) {
+      newErrors.family_size = 'Household size must be at least 1';
+    } else if (formData.family_size > 10) {
+      newErrors.family_size = 'Household size must be 10 or fewer';
     }
 
     setErrors(newErrors);
@@ -374,7 +390,11 @@ export function FormCard() {
                 setFormData({ ...formData, salary: value });
               }}
               onFocus={(e) => e.target.select()}
-              className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500"
+              className={`w-full pl-8 pr-4 py-3 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
+                errors.salary
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500'
+              }`}
               placeholder="90,000"
               inputMode="numeric"
             />
@@ -391,14 +411,17 @@ export function FormCard() {
             id="family_size"
             value={formData.family_size}
             onChange={(e) => setFormData({ ...formData, family_size: parseInt(e.target.value) })}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer"
+            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer ${
+              errors.family_size ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+            }`}
           >
-            {[1, 2, 3, 4, 5, 6].map((size) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
               <option key={size} value={size}>
                 {size} {size === 1 ? 'person' : 'people'}
               </option>
             ))}
           </select>
+          {errors.family_size && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.family_size}</p>}
         </div>
 
         {/* Transportation Mode */}
@@ -627,7 +650,7 @@ export function FormCard() {
         {/* Submit Button */}
         <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || Object.keys(errors).length > 0}
             className={`w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group ${
               isSubmitting ? 'animate-pulse' : ''
             }`}
