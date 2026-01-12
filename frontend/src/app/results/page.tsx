@@ -16,7 +16,7 @@ function ResultsContent() {
   const [hoveredMetro, setHoveredMetro] = useState<Metro | null>(null);
   const [sortField, setSortField] = useState<SortField>('score');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [showMap, setShowMap] = useState(true);
+  const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
   const [selectedMetros, setSelectedMetros] = useState<Metro[]>([]);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -247,7 +247,7 @@ function ResultsContent() {
               <button
                 key={field}
                 onClick={() => handleSort(field)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95 ${
+                className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95 touch-manipulation ${
                   sortField === field
                     ? 'bg-primary-600 text-white shadow-lg'
                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -259,11 +259,39 @@ function ResultsContent() {
                 )}
               </button>
             ))}
+          </div>
+
+          {/* Mobile Tab Switcher */}
+          <div className="md:hidden mt-4 bg-gray-200 dark:bg-gray-800 p-1 rounded-xl inline-flex w-full animate-in fade-in slide-in-from-top-2 duration-500 delay-150">
             <button
-              onClick={() => setShowMap(!showMap)}
-              className="md:hidden px-3 py-1.5 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105"
+              onClick={() => setMobileView('list')}
+              className={`flex-1 px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all touch-manipulation ${
+                mobileView === 'list'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
             >
-              {showMap ? 'Hide' : 'Show'} Map
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                List
+              </span>
+            </button>
+            <button
+              onClick={() => setMobileView('map')}
+              className={`flex-1 px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all touch-manipulation ${
+                mobileView === 'map'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                Map
+              </span>
             </button>
           </div>
         </div>
@@ -273,7 +301,9 @@ function ResultsContent() {
           {/* City Cards List */}
           <div
             ref={scrollContainerRef}
-            className="space-y-4 custom-scrollbar overflow-y-auto overflow-x-hidden"
+            className={`space-y-4 custom-scrollbar overflow-y-auto overflow-x-hidden ${
+              mobileView === 'list' ? 'block' : 'hidden'
+            } md:block`}
             style={{ maxHeight: 'calc(100vh - 250px)', overscrollBehavior: 'contain' }}
           >
             {sortedMetros.map((metro, idx) => (
@@ -299,7 +329,9 @@ function ResultsContent() {
 
           {/* Map */}
           <div
-            className={`${showMap ? 'block' : 'hidden'} md:block sticky top-4 animate-in fade-in slide-in-from-right-4 duration-700`}
+            className={`sticky top-4 animate-in fade-in slide-in-from-right-4 duration-700 ${
+              mobileView === 'map' ? 'block' : 'hidden'
+            } md:block`}
             style={{ height: 'calc(100vh - 250px)' }}
           >
             <MapView metros={sortedMetros} hoveredMetro={hoveredMetro} />
