@@ -12,6 +12,21 @@ interface SavedSearch {
   data: RankRequest;
 }
 
+const TRANSPORT_OPTIONS = [
+  { value: 'public_transit', label: 'Transit', hint: 'Lower costs in walkable cities' },
+  { value: 'car', label: 'Car', hint: 'Includes insurance, gas & parking' },
+  { value: 'bike_walk', label: 'Bike / Walk', hint: 'Minimal costs, high walkability' },
+] as const;
+
+const QOL_WEIGHTS = [
+  { key: 'affordability_weight', label: 'Affordability', default: 10 },
+  { key: 'schools_weight', label: 'Schools', default: 0 },
+  { key: 'safety_weight', label: 'Safety', default: 0 },
+  { key: 'weather_weight', label: 'Weather', default: 0 },
+  { key: 'healthcare_weight', label: 'Healthcare', default: 0 },
+  { key: 'walkability_weight', label: 'Walkability', default: 0 },
+] as const;
+
 export function FormCard() {
   const router = useRouter();
   const [formData, setFormData] = useState<RankRequest>({
@@ -38,69 +53,21 @@ export function FormCard() {
   const [showSavedSearches, setShowSavedSearches] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Real-time validation effect
   useEffect(() => {
-    // Only validate if user has started interacting with form
-    if (formData.salary !== 90000 || formData.family_size !== 1) {
-      validateForm();
-    }
+    if (formData.salary !== 90000 || formData.family_size !== 1) validateForm();
   }, [formData.salary, formData.family_size]);
 
-  const handleParsedPreferences = async (parsed: RankRequest) => {
-    setFormData(parsed);
-    setNlSuccess(true);
-    setShowNLInput(false);
-    setIsSubmitting(true);
-
-    // Save as last search
-    localStorage.setItem('livebetter_last_search', JSON.stringify(parsed));
-
-    // Brief delay for visual feedback
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Encode form data as query params and navigate to results
-    const params = new URLSearchParams({
-      salary: parsed.salary.toString(),
-      family_size: parsed.family_size.toString(),
-      rent_cap_pct: parsed.rent_cap_pct.toString(),
-      population_min: parsed.population_min.toString(),
-      limit: parsed.limit.toString(),
-      transport_mode: parsed.transport_mode,
-      affordability_weight: parsed.affordability_weight.toString(),
-      schools_weight: parsed.schools_weight.toString(),
-      safety_weight: parsed.safety_weight.toString(),
-      weather_weight: parsed.weather_weight.toString(),
-      healthcare_weight: parsed.healthcare_weight.toString(),
-      walkability_weight: parsed.walkability_weight.toString(),
-    });
-    router.push(`/results?${params.toString()}`);
-  };
-
-  // Load saved searches and last search from localStorage on mount
   useEffect(() => {
-    // Load saved searches
     const saved = localStorage.getItem('livebetter_searches');
     if (saved) {
-      try {
-        setSavedSearches(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse saved searches:', e);
-      }
+      try { setSavedSearches(JSON.parse(saved)); } catch {}
     }
-
-    // Load last search parameters
     const lastSearch = localStorage.getItem('livebetter_last_search');
     if (lastSearch) {
-      try {
-        const parsed = JSON.parse(lastSearch);
-        setFormData(parsed);
-      } catch (e) {
-        console.error('Failed to parse last search:', e);
-      }
+      try { setFormData(JSON.parse(lastSearch)); } catch {}
     }
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -108,33 +75,20 @@ export function FormCard() {
         setShowSavedSearches(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSavedSearches]);
 
-  // Format number with commas
-  const formatNumber = (num: number): string => {
-    if (num === 0) return '';
-    return num.toLocaleString('en-US');
-  };
+  const formatNumber = (num: number) => num === 0 ? '' : num.toLocaleString('en-US');
+  const parseFormattedNumber = (str: string) => str === '' ? 0 : parseInt(str.replace(/,/g, ''), 10);
 
-  // Parse formatted number string to integer
-  const parseFormattedNumber = (str: string): number => {
-    if (str === '') return 0;
-    return parseInt(str.replace(/,/g, ''), 10);
-  };
-
-  // Generate a descriptive name for the search
-  const generateSearchName = (data: RankRequest): string => {
+  const generateSearchName = (data: RankRequest) => {
     const salaryK = Math.round(data.salary / 1000);
     const familyText = data.family_size === 1 ? 'Single' : `Family of ${data.family_size}`;
-    const modeText = data.transport_mode === 'public_transit' ? 'Transit' :
-                     data.transport_mode === 'car' ? 'Car' : 'Bike/Walk';
-    return `$${salaryK}k ${familyText} · ${modeText}`;
+    const modeText = data.transport_mode === 'public_transit' ? 'Transit' : data.transport_mode === 'car' ? 'Car' : 'Bike/Walk';
+    return `$${salaryK}k · ${familyText} · ${modeText}`;
   };
 
-  // Save current search
   const handleSaveSearch = () => {
     const newSearch: SavedSearch = {
       id: Date.now().toString(),
@@ -142,540 +96,347 @@ export function FormCard() {
       timestamp: Date.now(),
       data: { ...formData },
     };
-
-    const updatedSearches = [newSearch, ...savedSearches].slice(0, 5); // Keep max 5
-    setSavedSearches(updatedSearches);
-    localStorage.setItem('livebetter_searches', JSON.stringify(updatedSearches));
-
-    // Show success message
+    const updated = [newSearch, ...savedSearches].slice(0, 5);
+    setSavedSearches(updated);
+    localStorage.setItem('livebetter_searches', JSON.stringify(updated));
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2000);
   };
 
-  // Load a saved search
   const handleLoadSearch = (search: SavedSearch) => {
     setFormData(search.data);
     setShowSavedSearches(false);
   };
 
-  // Delete a saved search
   const handleDeleteSearch = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updatedSearches = savedSearches.filter(s => s.id !== id);
-    setSavedSearches(updatedSearches);
-    localStorage.setItem('livebetter_searches', JSON.stringify(updatedSearches));
+    const updated = savedSearches.filter(s => s.id !== id);
+    setSavedSearches(updated);
+    localStorage.setItem('livebetter_searches', JSON.stringify(updated));
   };
 
-  // Format timestamp for display
-  const formatTimestamp = (timestamp: number): string => {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return new Date(timestamp).toLocaleDateString();
+  const formatTimestamp = (ts: number) => {
+    const diff = Date.now() - ts;
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(diff / 3600000);
+    const d = Math.floor(diff / 86400000);
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m}m ago`;
+    if (h < 24) return `${h}h ago`;
+    if (d < 7) return `${d}d ago`;
+    return new Date(ts).toLocaleDateString();
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    // Salary validation
-    if (!formData.salary || formData.salary <= 0) {
-      newErrors.salary = 'Salary must be a positive number';
-    } else if (formData.salary < 10000) {
-      newErrors.salary = 'Salary must be at least $10,000';
-    } else if (formData.salary > 1000000) {
-      newErrors.salary = 'Salary must be less than $1,000,000';
-    } else if (isNaN(formData.salary)) {
-      newErrors.salary = 'Please enter a valid number';
-    }
-
-    // Family size validation
-    if (!formData.family_size || formData.family_size < 1) {
-      newErrors.family_size = 'Household size must be at least 1';
-    } else if (formData.family_size > 10) {
-      newErrors.family_size = 'Household size must be 10 or fewer';
-    }
-
+    if (!formData.salary || formData.salary <= 0) newErrors.salary = 'Enter a positive number';
+    else if (formData.salary < 10000) newErrors.salary = 'Must be at least $10,000';
+    else if (formData.salary > 1000000) newErrors.salary = 'Must be under $1,000,000';
+    if (!formData.family_size || formData.family_size < 1) newErrors.family_size = 'Must be at least 1';
+    else if (formData.family_size > 10) newErrors.family_size = 'Max 10 people';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const buildParams = (data: RankRequest) => new URLSearchParams({
+    salary: data.salary.toString(),
+    family_size: data.family_size.toString(),
+    rent_cap_pct: data.rent_cap_pct.toString(),
+    population_min: data.population_min.toString(),
+    limit: data.limit.toString(),
+    transport_mode: data.transport_mode,
+    affordability_weight: data.affordability_weight.toString(),
+    schools_weight: data.schools_weight.toString(),
+    safety_weight: data.safety_weight.toString(),
+    weather_weight: data.weather_weight.toString(),
+    healthcare_weight: data.healthcare_weight.toString(),
+    walkability_weight: data.walkability_weight.toString(),
+  });
+
+  const handleParsedPreferences = async (parsed: RankRequest) => {
+    setFormData(parsed);
+    setNlSuccess(true);
+    setShowNLInput(false);
+    setIsSubmitting(true);
+    localStorage.setItem('livebetter_last_search', JSON.stringify(parsed));
+    await new Promise(r => setTimeout(r, 500));
+    router.push(`/results?${buildParams(parsed)}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       setIsSubmitting(true);
-
-      // Save as last search
       localStorage.setItem('livebetter_last_search', JSON.stringify(formData));
-
-      // Brief delay for visual feedback
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Encode form data as query params
-      const params = new URLSearchParams({
-        salary: formData.salary.toString(),
-        family_size: formData.family_size.toString(),
-        rent_cap_pct: formData.rent_cap_pct.toString(),
-        population_min: formData.population_min.toString(),
-        limit: formData.limit.toString(),
-        transport_mode: formData.transport_mode,
-        affordability_weight: formData.affordability_weight.toString(),
-        schools_weight: formData.schools_weight.toString(),
-        safety_weight: formData.safety_weight.toString(),
-        weather_weight: formData.weather_weight.toString(),
-        healthcare_weight: formData.healthcare_weight.toString(),
-        walkability_weight: formData.walkability_weight.toString(),
-      });
-      router.push(`/results?${params.toString()}`);
+      await new Promise(r => setTimeout(r, 300));
+      router.push(`/results?${buildParams(formData)}`);
     }
   };
 
+  const selectedTransport = TRANSPORT_OPTIONS.find(o => o.value === formData.transport_mode);
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card p-8 max-w-2xl mx-auto backdrop-blur-sm border border-gray-200 dark:border-gray-700">
-      {/* Save/Load Controls */}
-      <div className="mb-6 flex gap-2 justify-end">
-        {/* Save Search Button */}
-        <button
-          type="button"
-          onClick={handleSaveSearch}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-          </svg>
-          Save Search
-        </button>
-
-        {/* Load Search Dropdown */}
-        {savedSearches.length > 0 && (
-          <div className="relative saved-searches-dropdown">
-            <button
-              type="button"
-              onClick={() => setShowSavedSearches(!showSavedSearches)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Recent ({savedSearches.length})
-              <svg className={`w-4 h-4 transition-transform ${showSavedSearches ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {/* Dropdown Menu */}
-            {showSavedSearches && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-10 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 px-2">RECENT SEARCHES</p>
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {savedSearches.map((search) => (
-                    <button
-                      key={search.id}
-                      onClick={() => handleLoadSearch(search)}
-                      className="w-full text-left px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 group"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {search.name}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {formatTimestamp(search.timestamp)}
-                          </p>
-                        </div>
-                        <button
-                          onClick={(e) => handleDeleteSearch(search.id, e)}
-                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Delete"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Save Success Message */}
-      {saveSuccess && (
-        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
-          <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Search saved successfully!
-          </p>
-        </div>
-      )}
-
-      {/* Natural Language Input Section - Collapsible */}
-      <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-[#111118] border border-[#1E1E2A] rounded max-w-2xl mx-auto">
+      {/* Top bar: NL toggle + saved searches */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1E1E2A]">
         <button
           type="button"
           onClick={() => setShowNLInput(!showNLInput)}
-          className="w-full flex items-center justify-between text-left mb-3"
+          className={`flex items-center gap-2 text-sm font-mono transition-colors ${showNLInput ? 'text-primary-400' : 'text-[#6B6B7E] hover:text-white'}`}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">✨</span>
-            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Quick Start: Describe Your Preferences
-            </span>
-          </div>
-          <svg
-            className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${showNLInput ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
+          Quick fill
         </button>
 
-        {showNLInput && (
-          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-            <NaturalLanguageInput onParsed={handleParsedPreferences} />
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {saveSuccess && (
+            <span className="text-xs font-mono text-primary-400">Saved</span>
+          )}
+          <button
+            type="button"
+            onClick={handleSaveSearch}
+            className="text-xs font-mono text-[#6B6B7E] hover:text-white transition-colors px-3 py-1.5 border border-[#1E1E2A] rounded hover:border-[#6B6B7E]"
+          >
+            Save
+          </button>
 
-        {nlSuccess && (
-          <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
-            <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Preferences parsed! Finding your ideal cities...
-            </p>
-          </div>
-        )}
+          {savedSearches.length > 0 && (
+            <div className="relative saved-searches-dropdown">
+              <button
+                type="button"
+                onClick={() => setShowSavedSearches(!showSavedSearches)}
+                className="flex items-center gap-1.5 text-xs font-mono text-[#6B6B7E] hover:text-white transition-colors px-3 py-1.5 border border-[#1E1E2A] rounded hover:border-[#6B6B7E]"
+              >
+                Recent ({savedSearches.length})
+                <svg className={`w-3 h-3 transition-transform ${showSavedSearches ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-        {!showNLInput && !nlSuccess && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Or fill out the form manually below
-          </p>
-        )}
+              {showSavedSearches && (
+                <div className="absolute right-0 mt-1 w-72 bg-[#111118] border border-[#1E1E2A] rounded shadow-2xl z-10">
+                  <div className="px-3 py-2 border-b border-[#1E1E2A]">
+                    <p className="text-[10px] font-mono text-[#6B6B7E] uppercase tracking-widest">Recent searches</p>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {savedSearches.map((search) => (
+                      <button
+                        key={search.id}
+                        onClick={() => handleLoadSearch(search)}
+                        className="w-full text-left px-3 py-2.5 hover:bg-[#16161F] transition-colors border-b border-[#1E1E2A] last:border-0 group"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <p className="text-sm text-white">{search.name}</p>
+                            <p className="text-[10px] font-mono text-[#6B6B7E] mt-0.5">{formatTimestamp(search.timestamp)}</p>
+                          </div>
+                          <button
+                            onClick={(e) => handleDeleteSearch(search.id, e)}
+                            className="text-[#3D3D52] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Salary Input */}
+      {/* NL input */}
+      {showNLInput && (
+        <div className="px-6 py-4 border-b border-[#1E1E2A] bg-[#0C0C14]">
+          <NaturalLanguageInput onParsed={handleParsedPreferences} />
+        </div>
+      )}
+
+      {nlSuccess && (
+        <div className="px-6 py-3 bg-primary-900/20 border-b border-primary-900 text-xs font-mono text-primary-400 flex items-center gap-2">
+          <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          Preferences parsed — finding your cities...
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
+
+        {/* Salary */}
         <div>
-          <label htmlFor="salary" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Annual Salary
-            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(Pre-tax)</span>
+          <label htmlFor="salary" className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+            Annual salary <span className="normal-case">(pre-tax)</span>
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-              $
-            </span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B7E] font-mono text-sm">$</span>
             <input
               type="text"
               id="salary"
               value={formatNumber(formData.salary)}
-              onChange={(e) => {
-                const value = parseFormattedNumber(e.target.value);
-                setFormData({ ...formData, salary: value });
-              }}
+              onChange={(e) => setFormData({ ...formData, salary: parseFormattedNumber(e.target.value) })}
               onFocus={(e) => e.target.select()}
-              className={`w-full pl-8 pr-4 py-3 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
-                errors.salary
-                  ? 'border-red-500 dark:border-red-500'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500'
+              className={`w-full pl-8 pr-4 py-3 bg-[#0C0C14] border rounded font-mono text-white placeholder-[#3D3D52] focus:outline-none focus:border-primary-600 transition-colors ${
+                errors.salary ? 'border-red-800' : 'border-[#1E1E2A]'
               }`}
               placeholder="90,000"
               inputMode="numeric"
             />
           </div>
-          {errors.salary && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.salary}</p>}
+          {errors.salary && <p className="mt-1 text-xs font-mono text-red-400">{errors.salary}</p>}
         </div>
 
-        {/* Family Size */}
+        {/* Household size */}
         <div>
-          <label htmlFor="family_size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Household Size
+          <label htmlFor="family_size" className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+            Household size
           </label>
           <select
             id="family_size"
             value={formData.family_size}
             onChange={(e) => setFormData({ ...formData, family_size: parseInt(e.target.value) })}
-            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer ${
-              errors.family_size ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+            className={`w-full px-3 py-3 bg-[#0C0C14] border rounded font-mono text-white focus:outline-none focus:border-primary-600 transition-colors cursor-pointer ${
+              errors.family_size ? 'border-red-800' : 'border-[#1E1E2A]'
             }`}
           >
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
-              <option key={size} value={size}>
-                {size} {size === 1 ? 'person' : 'people'}
+            {[1,2,3,4,5,6,7,8,9,10].map(n => (
+              <option key={n} value={n} className="bg-[#111118]">
+                {n} {n === 1 ? 'person' : 'people'}
               </option>
             ))}
           </select>
-          {errors.family_size && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.family_size}</p>}
+          {errors.family_size && <p className="mt-1 text-xs font-mono text-red-400">{errors.family_size}</p>}
         </div>
 
-        {/* Transportation Mode */}
+        {/* Transport mode — button group */}
         <div>
-          <label htmlFor="transport_mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Transportation Mode
+          <label className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+            Transportation mode
           </label>
-          <select
-            id="transport_mode"
-            value={formData.transport_mode}
-            onChange={(e) => setFormData({ ...formData, transport_mode: e.target.value as 'public_transit' | 'car' | 'bike_walk' })}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer"
-          >
-            <option value="public_transit">Public Transit User</option>
-            <option value="car">Car Owner</option>
-            <option value="bike_walk">Bike/Walk Primarily</option>
-          </select>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {formData.transport_mode === 'public_transit' && 'Lower costs in walkable, transit-rich cities'}
-            {formData.transport_mode === 'car' && 'Includes insurance, gas, maintenance, and parking'}
-            {formData.transport_mode === 'bike_walk' && 'Minimal costs, prioritizes highly walkable cities'}
-          </p>
+          <div className="flex rounded border border-[#1E1E2A] overflow-hidden">
+            {TRANSPORT_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setFormData({ ...formData, transport_mode: value })}
+                className={`flex-1 py-3 px-2 text-sm font-display font-medium transition-colors ${
+                  formData.transport_mode === value
+                    ? 'bg-primary-400 text-[#0C0C14] font-bold'
+                    : 'bg-[#0C0C14] text-[#6B6B7E] hover:text-white hover:bg-[#16161F]'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {selectedTransport && (
+            <p className="mt-1.5 text-[11px] font-mono text-[#6B6B7E]">{selectedTransport.hint}</p>
+          )}
         </div>
 
-        {/* Rent Cap Slider */}
+        {/* Rent cap */}
         <div>
-          <label htmlFor="rent_cap" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Maximum Rent
-            <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-              {(formData.rent_cap_pct * 100).toFixed(1)}% of income
-            </span>
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label htmlFor="rent_cap" className="text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono">
+              Max rent % of income
+            </label>
+            <span className="text-sm font-mono text-primary-400">{(formData.rent_cap_pct * 100).toFixed(0)}%</span>
+          </div>
           <input
             type="range"
             id="rent_cap"
-            min="0.1"
-            max="0.6"
-            step="0.01"
+            min="0.1" max="0.6" step="0.01"
             value={formData.rent_cap_pct}
             onChange={(e) => setFormData({ ...formData, rent_cap_pct: parseFloat(e.target.value) })}
-            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+            className="w-full"
           />
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <span>10%</span>
-            <span>30%</span>
-            <span>60%</span>
+          <div className="flex justify-between text-[10px] font-mono text-[#3D3D52] mt-1">
+            <span>10%</span><span>30%</span><span>60%</span>
           </div>
         </div>
 
-        {/* Population Filter */}
+        {/* City size */}
         <div>
-          <label htmlFor="population_min" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Minimum City Size
+          <label htmlFor="population_min" className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+            Minimum city size
           </label>
           <select
             id="population_min"
             value={formData.population_min}
             onChange={(e) => setFormData({ ...formData, population_min: parseInt(e.target.value) })}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer"
+            className="w-full px-3 py-3 bg-[#0C0C14] border border-[#1E1E2A] rounded font-mono text-white focus:outline-none focus:border-primary-600 transition-colors cursor-pointer"
           >
-            <option value="0">Any size</option>
-            <option value="100000">100,000+</option>
-            <option value="250000">250,000+</option>
-            <option value="500000">500,000+</option>
-            <option value="1000000">1,000,000+</option>
+            <option value="0" className="bg-[#111118]">Any size</option>
+            <option value="100000" className="bg-[#111118]">100k+</option>
+            <option value="250000" className="bg-[#111118]">250k+</option>
+            <option value="500000" className="bg-[#111118]">500k+</option>
+            <option value="1000000" className="bg-[#111118]">1M+</option>
           </select>
         </div>
 
-        {/* Quality of Life Preferences - Collapsible */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+        {/* QoL weights — collapsible */}
+        <div className="border-t border-[#1E1E2A] pt-4">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            className="flex items-center justify-between w-full text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono hover:text-white transition-colors"
           >
-            <span>Quality of Life Priorities</span>
-            <svg
-              className={`w-5 h-5 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <span>Quality of life weights</span>
+            <svg className={`w-3 h-3 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           {showAdvanced && (
-            <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Adjust how much each factor matters to you (0-10). Higher weights prioritize that factor in rankings.
+            <div className="mt-4 space-y-4">
+              <p className="text-[11px] font-mono text-[#6B6B7E]">
+                Set 0–10. Higher = more weight in the final ranking.
               </p>
-
-              {/* Affordability Weight */}
-              <div>
-                <label htmlFor="affordability_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="mr-2">💰</span>
-                  Affordability
-                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-                    {formData.affordability_weight}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="affordability_weight"
-                  min="0"
-                  max="10"
-                  step="1"
-                  value={formData.affordability_weight}
-                  onChange={(e) => setFormData({ ...formData, affordability_weight: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  <span>Not important</span>
-                  <span>Very important</span>
+              {QOL_WEIGHTS.map(({ key, label }) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs text-[#6B6B7E]">{label}</label>
+                    <span className="text-xs font-mono text-primary-400">{(formData as any)[key]}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0" max="10" step="1"
+                    value={(formData as any)[key]}
+                    onChange={(e) => setFormData({ ...formData, [key]: parseInt(e.target.value) })}
+                    className="w-full"
+                  />
                 </div>
-              </div>
-
-              {/* Schools Weight */}
-              <div>
-                <label htmlFor="schools_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="mr-2">🎓</span>
-                  School Quality
-                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-                    {formData.schools_weight}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="schools_weight"
-                  min="0"
-                  max="10"
-                  step="1"
-                  value={formData.schools_weight}
-                  onChange={(e) => setFormData({ ...formData, schools_weight: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                />
-              </div>
-
-              {/* Safety Weight */}
-              <div>
-                <label htmlFor="safety_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="mr-2">🛡️</span>
-                  Safety
-                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-                    {formData.safety_weight}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="safety_weight"
-                  min="0"
-                  max="10"
-                  step="1"
-                  value={formData.safety_weight}
-                  onChange={(e) => setFormData({ ...formData, safety_weight: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                />
-              </div>
-
-              {/* Weather Weight */}
-              <div>
-                <label htmlFor="weather_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="mr-2">☀️</span>
-                  Weather
-                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-                    {formData.weather_weight}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="weather_weight"
-                  min="0"
-                  max="10"
-                  step="1"
-                  value={formData.weather_weight}
-                  onChange={(e) => setFormData({ ...formData, weather_weight: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                />
-              </div>
-
-              {/* Healthcare Weight */}
-              <div>
-                <label htmlFor="healthcare_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="mr-2">🏥</span>
-                  Healthcare
-                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-                    {formData.healthcare_weight}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="healthcare_weight"
-                  min="0"
-                  max="10"
-                  step="1"
-                  value={formData.healthcare_weight}
-                  onChange={(e) => setFormData({ ...formData, healthcare_weight: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                />
-              </div>
-
-              {/* Walkability Weight */}
-              <div>
-                <label htmlFor="walkability_weight" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="mr-2">🚶</span>
-                  Walkability
-                  <span className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400">
-                    {formData.walkability_weight}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="walkability_weight"
-                  min="0"
-                  max="10"
-                  step="1"
-                  value={formData.walkability_weight}
-                  onChange={(e) => setFormData({ ...formData, walkability_weight: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                />
-              </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
-            type="submit"
-            disabled={isSubmitting || Object.keys(errors).length > 0}
-            className={`w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group ${
-              isSubmitting ? 'animate-pulse' : ''
-            }`}
-          >
-            <span className="relative z-10">
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Analyzing...
-                </span>
-              ) : (
-                'Find Cities'
-              )}
+          type="submit"
+          disabled={isSubmitting || Object.keys(errors).length > 0}
+          className={`w-full py-4 bg-primary-400 hover:bg-primary-300 text-[#0C0C14] font-display font-bold text-lg rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isSubmitting ? 'opacity-60' : ''}`}
+        >
+          {isSubmitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Ranking cities...
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-700 to-primary-600 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          </button>
+          ) : (
+            'Rank cities'
+          )}
+        </button>
       </form>
-
-      {/* Info text */}
-      <p className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400">
-        Rankings based on real market rent data (Zillow), regional cost-of-living indices, and after-tax income calculations.
-      </p>
     </div>
   );
 }

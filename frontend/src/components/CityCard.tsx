@@ -16,19 +16,11 @@ interface CityCardProps {
 export function CityCard({ metro, rank, onHover, isSelected, onToggleSelect, isDisabled }: CityCardProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 
-  const formatNumber = (num: number | null) => {
-    if (num === null) return 'N/A';
-    return new Intl.NumberFormat('en-US').format(num);
-  };
+  const formatNumber = (num: number | null) =>
+    num === null ? 'N/A' : new Intl.NumberFormat('en-US').format(num);
 
   const totalEssentials =
     metro.essentials.rent +
@@ -38,269 +30,228 @@ export function CityCard({ metro, rank, onHover, isSelected, onToggleSelect, isD
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 p-6 border transform hover:-translate-y-2 hover:scale-[1.02] ${
+      className={`relative bg-[#111118] border-l-2 border border-[#1E1E2A] rounded overflow-hidden transition-all duration-200 ${
         isSelected
-          ? 'border-primary-500 dark:border-primary-400 border-2 shadow-lg'
-          : 'border-gray-100 dark:border-gray-700'
-      } relative`}
+          ? 'border-l-primary-400 shadow-glow-sm'
+          : 'hover:border-l-primary-400/40 hover:bg-[#13131C]'
+      }`}
       onMouseEnter={() => onHover?.(metro)}
       onMouseLeave={() => onHover?.(null)}
     >
-      {/* Compare Button - Top Right */}
-      {onToggleSelect && (
+      {/* Ghost rank number */}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[80px] font-display font-black leading-none text-[#16161F] select-none pointer-events-none">
+        {rank}
+      </div>
+
+      <div className="p-4 relative">
+        {/* Top row: rank + name + compare button */}
+        <div className="flex items-start justify-between mb-3 pr-16">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-mono text-primary-400 uppercase tracking-widest">#{rank}</span>
+              {metro.population && (
+                <span className="text-[10px] text-[#6B6B7E] font-mono">
+                  · {(metro.population / 1_000_000).toFixed(1)}M pop
+                </span>
+              )}
+            </div>
+            <h3 className="font-display font-bold text-lg text-white leading-tight">{metro.name}</h3>
+            <p className="text-sm text-[#6B6B7E]">{metro.state}</p>
+          </div>
+
+          {onToggleSelect && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled || isSelected) onToggleSelect(metro);
+              }}
+              disabled={isDisabled && !isSelected}
+              title={isDisabled && !isSelected ? 'Max 4 cities for comparison' : ''}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all ${
+                isSelected
+                  ? 'bg-primary-400 text-[#0C0C14] font-bold'
+                  : isDisabled
+                  ? 'bg-[#1E1E2A] text-[#3D3D52] cursor-not-allowed'
+                  : 'bg-[#16161F] text-[#6B6B7E] hover:text-white hover:bg-[#1E1E2A] border border-[#1E1E2A]'
+              }`}
+            >
+              {isSelected ? (
+                <>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Added
+                </>
+              ) : (
+                <>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Compare
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Score bar */}
+        <ScoreBar score={metro.score} className="mb-3" />
+
+        {/* Key stats */}
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="bg-[#0C0C14] px-3 py-2 rounded border border-[#1E1E2A]">
+            <div className="text-[9px] uppercase tracking-widest text-[#6B6B7E] mb-1">Rent/mo</div>
+            <div className="font-mono font-semibold text-sm text-white">{formatCurrency(metro.essentials.rent)}</div>
+          </div>
+          <div className="bg-[#0C0C14] px-3 py-2 rounded border border-[#1E1E2A]">
+            <div className="text-[9px] uppercase tracking-widest text-[#6B6B7E] mb-1">Disc. income</div>
+            <div className="font-mono font-semibold text-sm text-primary-400">{formatCurrency(metro.discretionary_income)}</div>
+          </div>
+          <div className="bg-[#0C0C14] px-3 py-2 rounded border border-[#1E1E2A]">
+            <div className="text-[9px] uppercase tracking-widest text-[#6B6B7E] mb-1">Cost index</div>
+            <div className="font-mono font-semibold text-sm text-white">{metro.rpp_index.toFixed(2)}</div>
+          </div>
+        </div>
+
+        {/* QoL badges */}
+        {metro.quality_of_life && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {metro.quality_of_life.weather_score != null && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#16161F] border border-[#1E1E2A] rounded text-[10px] text-[#6B6B7E]">
+                ☀ <span className="font-mono">{metro.quality_of_life.weather_score.toFixed(0)}</span>
+              </span>
+            )}
+            {metro.quality_of_life.air_quality_index != null && (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 bg-[#16161F] border rounded text-[10px] font-mono ${
+                metro.quality_of_life.air_quality_index <= 50 ? 'border-primary-900 text-primary-400' :
+                metro.quality_of_life.air_quality_index <= 100 ? 'border-yellow-900 text-yellow-500' : 'border-orange-900 text-orange-400'
+              }`}>
+                AQI {metro.quality_of_life.air_quality_index.toFixed(0)}
+              </span>
+            )}
+            {metro.quality_of_life.walkability_score != null && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#16161F] border border-[#1E1E2A] rounded text-[10px] text-[#6B6B7E]">
+                Walk <span className="font-mono">{metro.quality_of_life.walkability_score.toFixed(0)}</span>
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Expand toggle */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isDisabled || isSelected) {
-              onToggleSelect(metro);
-            }
-          }}
-          disabled={isDisabled && !isSelected}
-          className={`absolute top-4 right-4 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-            isSelected
-              ? 'bg-primary-600 text-white shadow-md hover:bg-primary-700 hover:scale-105 active:scale-95'
-              : isDisabled
-              ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105 active:scale-95'
-          }`}
-          title={isDisabled && !isSelected ? 'Maximum 4 cities can be selected for comparison' : ''}
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-1.5 text-[11px] text-[#6B6B7E] hover:text-primary-400 transition-colors font-mono"
         >
           <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            className={`w-3 h-3 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
           >
-            {isSelected ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            )}
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
-          {isSelected ? 'Selected' : 'Compare'}
+          {expanded ? 'less' : 'breakdown'}
         </button>
-      )}
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1 pr-20">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-bold text-sm">
-              #{rank}
-            </span>
+        {/* Expanded breakdown */}
+        {expanded && (
+          <div className="mt-3 pt-3 border-t border-[#1E1E2A] space-y-4">
+            {/* QoL detail */}
+            {metro.quality_of_life && (
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-[#6B6B7E] mb-2">Quality of life</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  {metro.quality_of_life.weather_score != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Weather</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.weather_score.toFixed(0)}/100</span>
+                    </div>
+                  )}
+                  {metro.quality_of_life.air_quality_index != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Air quality</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.air_quality_index.toFixed(0)} AQI</span>
+                    </div>
+                  )}
+                  {metro.quality_of_life.school_score != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Schools</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.school_score.toFixed(0)}/100</span>
+                    </div>
+                  )}
+                  {metro.quality_of_life.crime_rate != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Crime rate</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.crime_rate.toFixed(0)}/100k</span>
+                    </div>
+                  )}
+                  {metro.quality_of_life.healthcare_score != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Healthcare</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.healthcare_score.toFixed(0)}/100</span>
+                    </div>
+                  )}
+                  {metro.quality_of_life.walkability_score != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Walkability</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.walkability_score.toFixed(0)}/100</span>
+                    </div>
+                  )}
+                  {metro.quality_of_life.commute_time_mins != null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#6B6B7E]">Commute</span>
+                      <span className="font-mono text-white">{metro.quality_of_life.commute_time_mins.toFixed(0)} min</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Cost breakdown */}
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {metro.name}, {metro.state}
-              </h3>
-              {metro.population && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Pop. {formatNumber(metro.population)}
-                </p>
+              <p className="text-[10px] uppercase tracking-widest text-[#6B6B7E] mb-2">Monthly costs</p>
+              <div className="space-y-1.5">
+                {[
+                  { label: 'Rent', value: metro.essentials.rent },
+                  { label: 'Utilities', value: metro.essentials.utilities },
+                  { label: 'Groceries', value: metro.essentials.groceries },
+                  { label: 'Transport', value: metro.essentials.transport },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex justify-between text-xs">
+                    <span className="text-[#6B6B7E]">{label}</span>
+                    <span className="font-mono text-white">{formatCurrency(value)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-xs pt-1.5 border-t border-[#1E1E2A]">
+                  <span className="text-white font-medium">Total</span>
+                  <span className="font-mono font-bold text-white">{formatCurrency(totalEssentials)}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#6B6B7E]">Adjusted income</span>
+                  <span className="font-mono text-[#6B6B7E]">{formatCurrency(metro.net_monthly_adjusted)}/mo</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Signals */}
+            <div className="flex flex-wrap gap-1.5">
+              {metro.discretionary_income > 2000 && (
+                <span className="text-[10px] px-2 py-0.5 bg-primary-900/30 text-primary-400 border border-primary-900 rounded font-mono">
+                  high discretionary
+                </span>
+              )}
+              {metro.rpp_index < 1.0 && (
+                <span className="text-[10px] px-2 py-0.5 bg-primary-900/30 text-primary-400 border border-primary-900 rounded font-mono">
+                  below avg cost
+                </span>
+              )}
+              {metro.rpp_index > 1.1 && (
+                <span className="text-[10px] px-2 py-0.5 bg-orange-900/20 text-orange-400 border border-orange-900 rounded font-mono">
+                  above avg cost
+                </span>
               )}
             </div>
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Score Bar */}
-      <ScoreBar score={metro.score} className="mb-4" />
-
-      {/* Key Stats Row */}
-      <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Rent</div>
-          <div className="font-bold font-mono text-gray-900 dark:text-gray-100">
-            {formatCurrency(metro.essentials.rent)}
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">DI/mo</div>
-          <div className="font-bold font-mono text-gray-900 dark:text-gray-100">
-            {formatCurrency(metro.discretionary_income)}
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">RPP</div>
-          <div className="font-bold font-mono text-gray-900 dark:text-gray-100">
-            {metro.rpp_index.toFixed(2)}
-          </div>
-        </div>
-      </div>
-
-      {/* Expand/Collapse Button */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-all hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg py-2"
-      >
-        {expanded ? 'Hide' : 'Show'} breakdown
-        <svg
-          className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {/* Quality of Life Badges - Always Visible */}
-      {metro.quality_of_life && (
-        <div className="flex flex-wrap gap-2 mt-3">
-          {metro.quality_of_life.weather_score !== undefined && metro.quality_of_life.weather_score !== null && (
-            <div className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-full text-xs font-medium">
-              <span>☀️</span>
-              <span>Weather {metro.quality_of_life.weather_score.toFixed(0)}/100</span>
-            </div>
-          )}
-          {metro.quality_of_life.air_quality_index !== undefined && metro.quality_of_life.air_quality_index !== null && (
-            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-              metro.quality_of_life.air_quality_index <= 50
-                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-                : metro.quality_of_life.air_quality_index <= 100
-                ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
-                : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
-            }`}>
-              <span>🌬️</span>
-              <span>AQI {metro.quality_of_life.air_quality_index.toFixed(0)}</span>
-            </div>
-          )}
-          {metro.quality_of_life.walkability_score !== undefined && metro.quality_of_life.walkability_score !== null && (
-            <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
-              <span>🚶</span>
-              <span>Walk {metro.quality_of_life.walkability_score.toFixed(0)}/100</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Expanded Breakdown */}
-      {expanded && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-          {/* Quality of Life Section */}
-          {metro.quality_of_life && (
-            <div className="mb-4 p-3 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Quality of Life</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {metro.quality_of_life.weather_score !== undefined && metro.quality_of_life.weather_score !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">☀️ Weather</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.weather_score.toFixed(0)}/100</span>
-                  </div>
-                )}
-                {metro.quality_of_life.air_quality_index !== undefined && metro.quality_of_life.air_quality_index !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">🌬️ Air Quality</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.air_quality_index.toFixed(0)} AQI</span>
-                  </div>
-                )}
-                {metro.quality_of_life.school_score !== undefined && metro.quality_of_life.school_score !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">🎓 Schools</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.school_score.toFixed(0)}/100</span>
-                  </div>
-                )}
-                {metro.quality_of_life.crime_rate !== undefined && metro.quality_of_life.crime_rate !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">🛡️ Safety</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.crime_rate.toFixed(0)}/100k</span>
-                  </div>
-                )}
-                {metro.quality_of_life.healthcare_score !== undefined && metro.quality_of_life.healthcare_score !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">🏥 Healthcare</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.healthcare_score.toFixed(0)}/100</span>
-                  </div>
-                )}
-                {metro.quality_of_life.walkability_score !== undefined && metro.quality_of_life.walkability_score !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">🚶 Walkability</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.walkability_score.toFixed(0)}/100</span>
-                  </div>
-                )}
-                {metro.quality_of_life.commute_time_mins !== undefined && metro.quality_of_life.commute_time_mins !== null && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">🚗 Commute</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{metro.quality_of_life.commute_time_mins.toFixed(0)} min</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Cost Breakdown */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Monthly Costs</h4>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Rent</span>
-              <span className="font-mono font-medium text-gray-900 dark:text-gray-100">
-                {formatCurrency(metro.essentials.rent)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Utilities</span>
-              <span className="font-mono font-medium text-gray-900 dark:text-gray-100">
-                {formatCurrency(metro.essentials.utilities)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Groceries</span>
-              <span className="font-mono font-medium text-gray-900 dark:text-gray-100">
-                {formatCurrency(metro.essentials.groceries)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Transport</span>
-              <span className="font-mono font-medium text-gray-900 dark:text-gray-100">
-                {formatCurrency(metro.essentials.transport)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm pt-2 border-t border-gray-200 dark:border-gray-700 font-semibold">
-              <span className="text-gray-900 dark:text-gray-100">Total Essentials</span>
-              <span className="font-mono text-gray-900 dark:text-gray-100">
-                {formatCurrency(totalEssentials)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Adjusted Income</span>
-              <span className="font-mono font-medium text-gray-900 dark:text-gray-100">
-                {formatCurrency(metro.net_monthly_adjusted)}
-              </span>
-            </div>
-          </div>
-
-          {/* Why it ranks */}
-          <div className="mt-3 space-y-1">
-            {metro.discretionary_income > 2000 && (
-              <div className="flex items-start gap-2 text-xs text-accent-700 dark:text-accent-400">
-                <span>✓</span>
-                <span>High discretionary income</span>
-              </div>
-            )}
-            {metro.rpp_index < 1.0 && (
-              <div className="flex items-start gap-2 text-xs text-accent-700 dark:text-accent-400">
-                <span>✓</span>
-                <span>Below-average cost of living</span>
-              </div>
-            )}
-            {metro.rpp_index > 1.1 && (
-              <div className="flex items-start gap-2 text-xs text-orange-700 dark:text-orange-400">
-                <span>⚠</span>
-                <span>Above-average cost of living</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

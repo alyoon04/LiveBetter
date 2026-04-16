@@ -1,14 +1,31 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Space_Grotesk, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { LayoutWrapper } from '@/components/LayoutWrapper';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-ibm-plex-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'LiveBetter - Find Your Perfect City',
-  description: 'Discover the most affordable U.S. cities based on your salary and lifestyle preferences.',
+  title: 'LiveBetter — Find Where Your Money Goes Further',
+  description: 'Rank every U.S. metro by what you\'ll actually have left after rent, food, and getting around—based on your salary.',
   keywords: ['cost of living', 'affordability', 'city rankings', 'relocation', 'salary comparison'],
 };
 
@@ -22,11 +39,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                document.documentElement.classList.add('dark');
-              })();
-            `,
+            __html: `(function(){document.documentElement.classList.add('dark');})();`,
           }}
         />
         <link
@@ -36,7 +49,7 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} font-sans`}>
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>
         </Providers>

@@ -1,24 +1,22 @@
+import Link from 'next/link';
 import { Logo } from './Logo';
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 mt-auto">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <Logo size={32} />
-            <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
-              LiveBetter
+    <footer className="border-t border-[#1E1E2A] bg-[#0C0C14] mt-auto">
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Logo size={24} />
+            <span className="font-display font-bold text-white">
+              Live<span className="text-primary-400">Better</span>
             </span>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400 text-center md:text-left">
-            <p className="mb-2">Data last updated: Q4 2025</p>
-            <a
-              href="/methodology"
-              className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
+          <div className="flex items-center gap-6 text-sm text-[#6B6B7E]">
+            <span>Data: Q4 2025 · Zillow, BEA, Census</span>
+            <Link href="/methodology" className="hover:text-white transition-colors">
               Methodology
-            </a>
+            </Link>
           </div>
         </div>
       </div>

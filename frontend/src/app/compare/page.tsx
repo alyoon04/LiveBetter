@@ -38,19 +38,12 @@ function CompareContent() {
 
   if (!metros || metros.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-[#0C0C14]">
         <div className="text-center max-w-md">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            No cities selected
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Please select cities from the results page to compare.
-          </p>
-          <Link
-            href="/search"
-            className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
-          >
-            Start New Search
+          <h2 className="font-display font-bold text-2xl text-white mb-2">No cities selected</h2>
+          <p className="text-[#6B6B7E] text-sm mb-6 font-mono">Select cities from the results page to compare.</p>
+          <Link href="/search" className="inline-block px-6 py-3 bg-primary-400 hover:bg-primary-300 text-[#0C0C14] font-display font-bold rounded transition-colors">
+            Start new search
           </Link>
         </div>
       </div>
@@ -92,55 +85,44 @@ function CompareContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-[#0C0C14] py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              City Comparison
-            </h1>
-            <Link
-              href="/search"
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-700 dark:text-gray-300"
-            >
-              New Search
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="font-display font-bold text-2xl text-white">City comparison</h1>
+            <Link href="/search" className="px-4 py-2 border border-[#1E1E2A] rounded text-sm text-[#6B6B7E] hover:text-white hover:border-[#6B6B7E] transition-colors font-mono">
+              New search
             </Link>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Comparing {metros.length} {metros.length === 1 ? 'city' : 'cities'}
+          <p className="text-sm font-mono text-[#6B6B7E]">
+            {metros.length} {metros.length === 1 ? 'city' : 'cities'}
           </p>
         </div>
 
         {/* Comparison Grid */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${metros.length}, minmax(0, 1fr))` }}>
-          {/* City Headers */}
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${metros.length}, minmax(0, 1fr))` }}>
           {metros.map((metro) => (
             <div
               key={metro.metro_id}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-card p-6 border border-gray-100 dark:border-gray-700"
+              className="bg-[#111118] border border-[#1E1E2A] rounded p-5 border-l-2 border-l-primary-400"
             >
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                {metro.name}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">{metro.state}</p>
+              <h2 className="font-display font-bold text-xl text-white mb-0.5">{metro.name}</h2>
+              <p className="text-sm text-[#6B6B7E] mb-3">{metro.state}</p>
               {metro.population && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  Population: {formatNumber(metro.population)}
+                <p className="text-xs font-mono text-[#6B6B7E] mb-3">
+                  {formatNumber(metro.population)} pop
                 </p>
               )}
-              <ScoreBar score={metro.score} className="mb-2" />
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                Overall Score: {metro.score.toFixed(1)}
-              </p>
+              <ScoreBar score={metro.score} />
             </div>
           ))}
         </div>
 
         {/* Affordability Metrics */}
-        <div className="mt-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Affordability</h3>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="mt-5">
+          <h3 className="font-display font-bold text-sm uppercase tracking-widest text-[#6B6B7E] mb-3">Affordability</h3>
+          <div className="bg-[#111118] border border-[#1E1E2A] rounded overflow-hidden">
             <table className="w-full">
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 <ComparisonRow
@@ -183,9 +165,9 @@ function CompareContent() {
         </div>
 
         {/* Housing & Living Costs */}
-        <div className="mt-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Monthly Costs</h3>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="mt-5">
+          <h3 className="font-display font-bold text-sm uppercase tracking-widest text-[#6B6B7E] mb-3">Monthly Costs</h3>
+          <div className="bg-[#111118] border border-[#1E1E2A] rounded overflow-hidden">
             <table className="w-full">
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 <ComparisonRow
@@ -251,9 +233,9 @@ function CompareContent() {
 
         {/* Quality of Life */}
         {metros.some(m => m.quality_of_life) && (
-          <div className="mt-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Quality of Life</h3>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="mt-5">
+            <h3 className="font-display font-bold text-sm uppercase tracking-widest text-[#6B6B7E] mb-3">Quality of Life</h3>
+            <div className="bg-[#111118] border border-[#1E1E2A] rounded overflow-hidden">
               <table className="w-full">
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {metros.some(m => m.quality_of_life?.weather_score) && (
@@ -336,8 +318,8 @@ function CompareContent() {
         )}
 
         {/* Visual Comparison Bars */}
-        <div className="mt-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Visual Comparison</h3>
+        <div className="mt-5">
+          <h3 className="font-display font-bold text-sm uppercase tracking-widest text-[#6B6B7E] mb-3">Visual Comparison</h3>
           <div className="space-y-6">
             <MetricBarChart
               label="Discretionary Income"
@@ -398,28 +380,22 @@ function ComparisonRow({
   const bestValue = getMaxValue();
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-      <td className="px-6 py-4">
-        <div className="font-medium text-gray-900 dark:text-gray-100">{label}</div>
+    <tr className="border-b border-[#1E1E2A] last:border-0 hover:bg-[#16161F] transition-colors">
+      <td className="px-5 py-3">
+        <div className="text-sm text-white">{label}</div>
         {description && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</div>
+          <div className="text-[10px] font-mono text-[#6B6B7E] mt-0.5">{description}</div>
         )}
       </td>
       {metros.map((metro) => {
         const value = getValue(metro);
         const isBest = value === bestValue;
         return (
-          <td key={metro.metro_id} className={`px-6 py-4 ${className}`}>
-            <div
-              className={`text-right font-mono ${
-                isBest
-                  ? 'text-primary-600 dark:text-primary-400 font-bold'
-                  : 'text-gray-900 dark:text-gray-100'
-              }`}
-            >
+          <td key={metro.metro_id} className={`px-5 py-3 ${className}`}>
+            <div className={`text-right font-mono text-sm ${isBest ? 'text-primary-400 font-bold' : 'text-white'}`}>
               {format(value)}
-              {suffix && <span className="text-xs ml-1">{suffix}</span>}
-              {isBest && <span className="ml-2">⭐</span>}
+              {suffix && <span className="text-xs ml-1 text-[#6B6B7E]">{suffix}</span>}
+              {isBest && <span className="ml-1.5 text-primary-400">↑</span>}
             </div>
           </td>
         );
@@ -440,25 +416,21 @@ function MetricBarChart({ label, metros, getValue, format, color }: MetricBarCha
   const maxValue = Math.max(...metros.map(getValue));
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-card border border-gray-100 dark:border-gray-700 p-6">
-      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{label}</h4>
+    <div className="bg-[#111118] border border-[#1E1E2A] rounded p-5">
+      <h4 className="font-display font-bold text-white mb-4">{label}</h4>
       <div className="space-y-4">
         {metros.map((metro) => {
           const value = getValue(metro);
           const percentage = (value / maxValue) * 100;
           return (
             <div key={metro.metro_id}>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {metro.name}, {metro.state}
-                </span>
-                <span className="text-sm font-mono font-semibold text-gray-900 dark:text-gray-100">
-                  {format(value)}
-                </span>
+              <div className="flex justify-between mb-1.5">
+                <span className="text-sm text-[#6B6B7E]">{metro.name}, {metro.state}</span>
+                <span className="text-sm font-mono font-bold text-white">{format(value)}</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-[#1E1E2A] h-1">
                 <div
-                  className={`${color} h-3 rounded-full transition-all duration-500 ease-out`}
+                  className={`${color} h-1 transition-all duration-500 ease-out`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
@@ -474,14 +446,8 @@ export default function ComparePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-          <div className="text-center">
-            <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-2 border-primary-400 opacity-20"></div>
-              <div className="relative animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-primary-600"></div>
-            </div>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">Loading...</p>
-          </div>
+        <div className="min-h-screen flex items-center justify-center bg-[#0C0C14]">
+          <div className="animate-spin rounded-full h-10 w-10 border-t border-b border-primary-400" />
         </div>
       }
     >
