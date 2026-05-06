@@ -6,26 +6,16 @@ interface ScoreBarProps {
 export function ScoreBar({ score, className = '' }: ScoreBarProps) {
   const percentage = Math.round(score * 100);
 
-  const getAccentColor = (score: number) => {
-    if (score >= 0.75) return '#2DD4BF';
-    if (score >= 0.55) return '#22C55E';
-    if (score >= 0.4) return '#EAB308';
-    if (score >= 0.25) return '#F97316';
-    return '#EF4444';
-  };
-
-  const color = getAccentColor(score);
-
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono">Score</span>
-        <span className="text-sm font-mono font-bold" style={{ color }}>{percentage}</span>
+        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-mono">Score</span>
+        <span className="text-sm font-mono font-bold text-white">{percentage}</span>
       </div>
-      <div className="w-full h-px bg-[#1E1E2A]">
+      <div className="w-full h-px bg-white/10">
         <div
-          className="h-full transition-all duration-700 ease-out"
-          style={{ width: `${percentage}%`, backgroundColor: color }}
+          className="h-full transition-all duration-700 ease-out bg-white"
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>

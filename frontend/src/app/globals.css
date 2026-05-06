@@ -4,26 +4,24 @@
 
 @layer base {
   :root {
-    --background: #0C0C14;
-    --foreground: #F1F0FF;
-    --surface: #111118;
-    --surface-raised: #16161F;
-    --border: #1E1E2A;
-    --text-muted: #6B6B7E;
-    --accent: #2DD4BF;
+    --background: #000000;
+    --foreground: #ffffff;
+    --surface: #111111;
+    --surface-raised: #1a1a1a;
+    --border: rgba(255, 255, 255, 0.1);
+    --text-muted: #9ca3af;
+    --accent: #ffffff;
   }
 
   body {
     background: var(--background);
     color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   html {
     scroll-behavior: auto !important;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-space-grotesk), system-ui, sans-serif;
   }
 }
 
@@ -38,18 +36,45 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 2px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+    background: rgba(255, 255, 255, 0.4);
   }
 
   /* Leaflet map fixes */
   .leaflet-container {
     z-index: 0;
   }
+}
+
+/* Liquid Glass */
+.liquid-glass {
+  background: rgba(0, 0, 0, 0.4);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 20%,
+    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+    rgba(255,255,255,0.1) 80%, rgba(255,255,255,0.3) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 @layer utilities {
@@ -78,54 +103,6 @@
   .fade-up-delay-2 { animation-delay: 260ms; }
   .fade-up-delay-3 { animation-delay: 400ms; }
   .fade-up-delay-4 { animation-delay: 520ms; }
-
-  /* Scramble text glow — fires once when scramble completes */
-  @keyframes scrambleGlow {
-    0%   { text-shadow: none; }
-    30%  { text-shadow: 0 0 24px rgba(45, 212, 191, 0.9), 0 0 48px rgba(45, 212, 191, 0.4); }
-    100% { text-shadow: none; }
-  }
-
-  @keyframes scrambleGlowWhite {
-    0%   { text-shadow: none; }
-    30%  { text-shadow: 0 0 20px rgba(241, 240, 255, 0.6), 0 0 40px rgba(241, 240, 255, 0.2); }
-    100% { text-shadow: none; }
-  }
-
-  .scramble-complete.glow-teal {
-    animation: scrambleGlow 0.9s ease-out forwards;
-  }
-
-  .scramble-complete.glow-white {
-    animation: scrambleGlowWhite 0.9s ease-out forwards;
-  }
-
-  /* Dot grid background */
-  .dot-grid {
-    background-image: radial-gradient(circle, #1E1E2A 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-
-  /* Gradient blobs */
-  .blob-teal {
-    position: absolute;
-    width: 700px;
-    height: 700px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(45, 212, 191, 0.12), transparent 70%);
-    filter: blur(60px);
-    pointer-events: none;
-  }
-
-  .blob-violet {
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.08), transparent 70%);
-    filter: blur(60px);
-    pointer-events: none;
-  }
 }
 
 /* Custom range input */
@@ -133,7 +110,7 @@ input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   height: 2px;
-  background: var(--border);
+  background: rgba(255, 255, 255, 0.1);
   outline: none;
   cursor: pointer;
   border-radius: 0;
@@ -144,25 +121,25 @@ input[type='range']::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #ffffff;
   cursor: pointer;
-  border: 2px solid var(--background);
-  box-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+  border: 2px solid #000000;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
   transition: box-shadow 0.2s;
 }
 
 input[type='range']::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 14px rgba(45, 212, 191, 0.7);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.5);
 }
 
 input[type='range']::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #ffffff;
   cursor: pointer;
-  border: 2px solid var(--background);
-  box-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+  border: 2px solid #000000;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 /* Leaflet CSS (required for react-leaflet) */

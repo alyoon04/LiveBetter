@@ -44,7 +44,7 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
 
       const parsed = await response.json();
       onParsed(parsed);
-      setText(''); // Clear input on success
+      setText('');
     } catch (err) {
       console.error('Parse error:', err);
       setError(err instanceof Error ? err.message : 'Failed to parse preferences');
@@ -58,7 +58,6 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Submit on Ctrl/Cmd + Enter
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       handleParse();
@@ -67,31 +66,19 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-2">
-        <svg
-          className="w-5 h-5 text-primary-600 dark:text-primary-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-          />
+        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-white">
           Describe Your Preferences
         </h3>
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-400">
+      <p className="text-sm text-gray-400">
         Tell us about your situation in plain English, and we'll fill out the form for you.
       </p>
 
-      {/* Text Area */}
       <div>
         <textarea
           value={text}
@@ -99,45 +86,31 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
           onKeyDown={handleKeyDown}
           placeholder="Example: I make $90k with a partner, we prefer public transit and care about walkability and weather..."
           rows={4}
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all hover:border-primary-400 dark:hover:border-primary-500 resize-none"
+          className="w-full px-4 py-3 border border-white/10 rounded-lg bg-white/[0.03] text-white placeholder-gray-600 focus:outline-none focus:border-white/30 transition-colors resize-none"
         />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-xs text-gray-500">
           Tip: Press Cmd/Ctrl + Enter to submit
         </p>
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
-      {/* Submit Button */}
       <button
         onClick={handleParse}
         disabled={isLoading || !text.trim()}
-        className={`w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+        className={`w-full bg-white hover:bg-gray-200 text-black font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
           isLoading ? 'animate-pulse' : ''
         }`}
       >
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">
             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
             Parsing...
           </span>
@@ -146,9 +119,8 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
         )}
       </button>
 
-      {/* Examples */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <div className="border-t border-white/10 pt-4">
+        <p className="text-xs font-medium text-gray-400 mb-2">
           Try an example:
         </p>
         <div className="space-y-2">
@@ -156,7 +128,7 @@ export function NaturalLanguageInput({ onParsed }: NaturalLanguageInputProps) {
             <button
               key={idx}
               onClick={() => handleExampleClick(example)}
-              className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors border border-gray-200 dark:border-gray-700"
+              className="w-full text-left px-3 py-2 text-sm text-gray-400 bg-white/[0.03] hover:bg-white/[0.06] rounded-lg transition-colors border border-white/10"
             >
               {example}
             </button>

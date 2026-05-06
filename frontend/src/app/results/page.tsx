@@ -102,14 +102,14 @@ function ResultsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0C0C14]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
           <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border border-primary-400 opacity-20" />
-            <div className="relative animate-spin rounded-full h-12 w-12 border-t border-b border-primary-400" />
+            <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border border-white/20 opacity-20" />
+            <div className="relative animate-spin rounded-full h-12 w-12 border-t border-b border-white" />
           </div>
-          <p className="font-display font-bold text-white mb-1">Ranking cities</p>
-          <p className="text-sm font-mono text-[#6B6B7E]">Analyzing cost of living data...</p>
+          <p className="font-semibold text-white mb-1">Ranking cities</p>
+          <p className="text-sm font-mono text-gray-400">Analyzing cost of living data...</p>
         </div>
       </div>
     );
@@ -117,13 +117,13 @@ function ResultsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0C0C14]">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center max-w-md">
-          <h2 className="font-display font-bold text-2xl text-white mb-2">Something went wrong</h2>
-          <p className="text-[#6B6B7E] text-sm mb-6 font-mono">
+          <h2 className="font-semibold text-2xl text-white mb-2">Something went wrong</h2>
+          <p className="text-gray-400 text-sm mb-6 font-mono">
             {error instanceof Error ? error.message : 'Failed to fetch results'}
           </p>
-          <Link href="/search" className="inline-block px-6 py-3 bg-primary-400 hover:bg-primary-300 text-[#0C0C14] font-display font-bold rounded transition-colors">
+          <Link href="/search" className="inline-block px-6 py-3 bg-white text-black font-medium rounded transition-colors hover:bg-gray-200">
             Try again
           </Link>
         </div>
@@ -138,18 +138,18 @@ function ResultsContent() {
   ];
 
   return (
-    <div className="bg-[#0C0C14] min-h-screen" style={{ scrollBehavior: 'auto' }}>
+    <div className="bg-black min-h-screen" style={{ scrollBehavior: 'auto' }}>
       <div className="container mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="font-display font-bold text-2xl text-white">
+              <h1 className="font-semibold text-2xl text-white">
                 {sortedMetros.length} cities ranked
               </h1>
               <div className="flex items-center gap-3 mt-0.5">
-                <p className="text-sm text-[#6B6B7E] font-mono">
+                <p className="text-sm text-gray-400 font-mono">
                   ${request.salary.toLocaleString()}/yr
                   {request.family_size > 1 && ` · ${request.family_size} people`}
                   {' · '}{request.transport_mode === 'public_transit' ? 'transit' : request.transport_mode === 'car' ? 'car' : 'bike/walk'}
@@ -157,8 +157,8 @@ function ResultsContent() {
                 {data?._responseTime !== undefined && (
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                     data._responseTime < 100
-                      ? 'border-primary-900 text-primary-400'
-                      : 'border-[#1E1E2A] text-[#6B6B7E]'
+                      ? 'border-white/20 text-white'
+                      : 'border-white/10 text-gray-400'
                   }`}>
                     {data._responseTime}ms{data._responseTime < 100 ? ' cached' : ''}
                   </span>
@@ -167,7 +167,7 @@ function ResultsContent() {
             </div>
             <Link
               href="/search"
-              className="px-4 py-2 border border-[#1E1E2A] rounded text-sm text-[#6B6B7E] hover:text-white hover:border-[#6B6B7E] transition-colors font-mono"
+              className="px-4 py-2 border border-white/10 rounded text-sm text-gray-400 hover:text-white hover:border-white/30 transition-colors font-mono"
             >
               Refine
             </Link>
@@ -175,15 +175,15 @@ function ResultsContent() {
 
           {/* Sort controls */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-widest font-mono text-[#6B6B7E]">Sort:</span>
+            <span className="text-[10px] uppercase tracking-widest font-mono text-gray-500">Sort:</span>
             {SORT_OPTIONS.map(({ field, label }) => (
               <button
                 key={field}
                 onClick={() => handleSort(field)}
                 className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${
                   sortField === field
-                    ? 'bg-primary-400 text-[#0C0C14] font-bold'
-                    : 'bg-[#111118] border border-[#1E1E2A] text-[#6B6B7E] hover:text-white hover:border-[#6B6B7E]'
+                    ? 'bg-white text-black font-bold'
+                    : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/30'
                 }`}
               >
                 {label}
@@ -195,13 +195,13 @@ function ResultsContent() {
           </div>
 
           {/* Mobile tab switcher */}
-          <div className="md:hidden mt-3 flex bg-[#111118] border border-[#1E1E2A] rounded overflow-hidden">
+          <div className="md:hidden mt-3 flex bg-white/5 border border-white/10 rounded overflow-hidden">
             {(['list', 'map'] as const).map((view) => (
               <button
                 key={view}
                 onClick={() => setMobileView(view)}
-                className={`flex-1 py-2.5 text-sm font-display font-medium transition-colors capitalize ${
-                  mobileView === view ? 'bg-primary-400 text-[#0C0C14]' : 'text-[#6B6B7E]'
+                className={`flex-1 py-2.5 text-sm font-medium transition-colors capitalize ${
+                  mobileView === view ? 'bg-white text-black' : 'text-gray-400'
                 }`}
               >
                 {view}
@@ -212,7 +212,6 @@ function ResultsContent() {
 
         {/* Split layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* City list */}
           <div
             ref={scrollContainerRef}
             className={`space-y-2 custom-scrollbar overflow-y-auto overflow-x-hidden ${
@@ -233,7 +232,6 @@ function ResultsContent() {
             ))}
           </div>
 
-          {/* Map */}
           <div
             className={`sticky top-4 ${mobileView === 'map' ? 'block' : 'hidden'} md:block`}
             style={{ height: 'calc(100vh - 220px)' }}
@@ -256,8 +254,8 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#0C0C14]">
-          <div className="animate-spin rounded-full h-10 w-10 border-t border-b border-primary-400" />
+        <div className="min-h-screen flex items-center justify-center bg-black">
+          <div className="animate-spin rounded-full h-10 w-10 border-t border-b border-white" />
         </div>
       }
     >

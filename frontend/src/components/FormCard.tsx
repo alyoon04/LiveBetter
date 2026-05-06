@@ -176,13 +176,13 @@ export function FormCard() {
   const selectedTransport = TRANSPORT_OPTIONS.find(o => o.value === formData.transport_mode);
 
   return (
-    <div className="bg-[#111118] border border-[#1E1E2A] rounded max-w-2xl mx-auto">
-      {/* Top bar: NL toggle + saved searches */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1E1E2A]">
+    <div className="bg-white/[0.03] border border-white/10 rounded max-w-2xl mx-auto">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <button
           type="button"
           onClick={() => setShowNLInput(!showNLInput)}
-          className={`flex items-center gap-2 text-sm font-mono transition-colors ${showNLInput ? 'text-primary-400' : 'text-[#6B6B7E] hover:text-white'}`}
+          className={`flex items-center gap-2 text-sm font-mono transition-colors ${showNLInput ? 'text-white' : 'text-gray-400 hover:text-white'}`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -192,12 +192,12 @@ export function FormCard() {
 
         <div className="flex items-center gap-2">
           {saveSuccess && (
-            <span className="text-xs font-mono text-primary-400">Saved</span>
+            <span className="text-xs font-mono text-white">Saved</span>
           )}
           <button
             type="button"
             onClick={handleSaveSearch}
-            className="text-xs font-mono text-[#6B6B7E] hover:text-white transition-colors px-3 py-1.5 border border-[#1E1E2A] rounded hover:border-[#6B6B7E]"
+            className="text-xs font-mono text-gray-400 hover:text-white transition-colors px-3 py-1.5 border border-white/10 rounded hover:border-white/30"
           >
             Save
           </button>
@@ -207,7 +207,7 @@ export function FormCard() {
               <button
                 type="button"
                 onClick={() => setShowSavedSearches(!showSavedSearches)}
-                className="flex items-center gap-1.5 text-xs font-mono text-[#6B6B7E] hover:text-white transition-colors px-3 py-1.5 border border-[#1E1E2A] rounded hover:border-[#6B6B7E]"
+                className="flex items-center gap-1.5 text-xs font-mono text-gray-400 hover:text-white transition-colors px-3 py-1.5 border border-white/10 rounded hover:border-white/30"
               >
                 Recent ({savedSearches.length})
                 <svg className={`w-3 h-3 transition-transform ${showSavedSearches ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,25 +216,25 @@ export function FormCard() {
               </button>
 
               {showSavedSearches && (
-                <div className="absolute right-0 mt-1 w-72 bg-[#111118] border border-[#1E1E2A] rounded shadow-2xl z-10">
-                  <div className="px-3 py-2 border-b border-[#1E1E2A]">
-                    <p className="text-[10px] font-mono text-[#6B6B7E] uppercase tracking-widest">Recent searches</p>
+                <div className="absolute right-0 mt-1 w-72 bg-black border border-white/10 rounded shadow-2xl z-10">
+                  <div className="px-3 py-2 border-b border-white/10">
+                    <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Recent searches</p>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     {savedSearches.map((search) => (
                       <button
                         key={search.id}
                         onClick={() => handleLoadSearch(search)}
-                        className="w-full text-left px-3 py-2.5 hover:bg-[#16161F] transition-colors border-b border-[#1E1E2A] last:border-0 group"
+                        className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors border-b border-white/10 last:border-0 group"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div>
                             <p className="text-sm text-white">{search.name}</p>
-                            <p className="text-[10px] font-mono text-[#6B6B7E] mt-0.5">{formatTimestamp(search.timestamp)}</p>
+                            <p className="text-[10px] font-mono text-gray-500 mt-0.5">{formatTimestamp(search.timestamp)}</p>
                           </div>
                           <button
                             onClick={(e) => handleDeleteSearch(search.id, e)}
-                            className="text-[#3D3D52] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                            className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -253,13 +253,13 @@ export function FormCard() {
 
       {/* NL input */}
       {showNLInput && (
-        <div className="px-6 py-4 border-b border-[#1E1E2A] bg-[#0C0C14]">
+        <div className="px-6 py-4 border-b border-white/10 bg-white/[0.02]">
           <NaturalLanguageInput onParsed={handleParsedPreferences} />
         </div>
       )}
 
       {nlSuccess && (
-        <div className="px-6 py-3 bg-primary-900/20 border-b border-primary-900 text-xs font-mono text-primary-400 flex items-center gap-2">
+        <div className="px-6 py-3 bg-white/5 border-b border-white/10 text-xs font-mono text-white flex items-center gap-2">
           <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -272,19 +272,19 @@ export function FormCard() {
 
         {/* Salary */}
         <div>
-          <label htmlFor="salary" className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+          <label htmlFor="salary" className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono mb-2">
             Annual salary <span className="normal-case">(pre-tax)</span>
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B7E] font-mono text-sm">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-mono text-sm">$</span>
             <input
               type="text"
               id="salary"
               value={formatNumber(formData.salary)}
               onChange={(e) => setFormData({ ...formData, salary: parseFormattedNumber(e.target.value) })}
               onFocus={(e) => e.target.select()}
-              className={`w-full pl-8 pr-4 py-3 bg-[#0C0C14] border rounded font-mono text-white placeholder-[#3D3D52] focus:outline-none focus:border-primary-600 transition-colors ${
-                errors.salary ? 'border-red-800' : 'border-[#1E1E2A]'
+              className={`w-full pl-8 pr-4 py-3 bg-white/[0.03] border rounded font-mono text-white placeholder-gray-600 focus:outline-none focus:border-white/30 transition-colors ${
+                errors.salary ? 'border-red-800' : 'border-white/10'
               }`}
               placeholder="90,000"
               inputMode="numeric"
@@ -295,19 +295,19 @@ export function FormCard() {
 
         {/* Household size */}
         <div>
-          <label htmlFor="family_size" className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+          <label htmlFor="family_size" className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono mb-2">
             Household size
           </label>
           <select
             id="family_size"
             value={formData.family_size}
             onChange={(e) => setFormData({ ...formData, family_size: parseInt(e.target.value) })}
-            className={`w-full px-3 py-3 bg-[#0C0C14] border rounded font-mono text-white focus:outline-none focus:border-primary-600 transition-colors cursor-pointer ${
-              errors.family_size ? 'border-red-800' : 'border-[#1E1E2A]'
+            className={`w-full px-3 py-3 bg-white/[0.03] border rounded font-mono text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer ${
+              errors.family_size ? 'border-red-800' : 'border-white/10'
             }`}
           >
             {[1,2,3,4,5,6,7,8,9,10].map(n => (
-              <option key={n} value={n} className="bg-[#111118]">
+              <option key={n} value={n} className="bg-black">
                 {n} {n === 1 ? 'person' : 'people'}
               </option>
             ))}
@@ -315,21 +315,21 @@ export function FormCard() {
           {errors.family_size && <p className="mt-1 text-xs font-mono text-red-400">{errors.family_size}</p>}
         </div>
 
-        {/* Transport mode — button group */}
+        {/* Transport mode */}
         <div>
-          <label className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+          <label className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono mb-2">
             Transportation mode
           </label>
-          <div className="flex rounded border border-[#1E1E2A] overflow-hidden">
+          <div className="flex rounded border border-white/10 overflow-hidden">
             {TRANSPORT_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setFormData({ ...formData, transport_mode: value })}
-                className={`flex-1 py-3 px-2 text-sm font-display font-medium transition-colors ${
+                className={`flex-1 py-3 px-2 text-sm font-medium transition-colors ${
                   formData.transport_mode === value
-                    ? 'bg-primary-400 text-[#0C0C14] font-bold'
-                    : 'bg-[#0C0C14] text-[#6B6B7E] hover:text-white hover:bg-[#16161F]'
+                    ? 'bg-white text-black font-bold'
+                    : 'bg-white/[0.03] text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {label}
@@ -337,17 +337,17 @@ export function FormCard() {
             ))}
           </div>
           {selectedTransport && (
-            <p className="mt-1.5 text-[11px] font-mono text-[#6B6B7E]">{selectedTransport.hint}</p>
+            <p className="mt-1.5 text-[11px] font-mono text-gray-500">{selectedTransport.hint}</p>
           )}
         </div>
 
         {/* Rent cap */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label htmlFor="rent_cap" className="text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono">
+            <label htmlFor="rent_cap" className="text-[10px] uppercase tracking-widest text-gray-400 font-mono">
               Max rent % of income
             </label>
-            <span className="text-sm font-mono text-primary-400">{(formData.rent_cap_pct * 100).toFixed(0)}%</span>
+            <span className="text-sm font-mono text-white">{(formData.rent_cap_pct * 100).toFixed(0)}%</span>
           </div>
           <input
             type="range"
@@ -357,36 +357,36 @@ export function FormCard() {
             onChange={(e) => setFormData({ ...formData, rent_cap_pct: parseFloat(e.target.value) })}
             className="w-full"
           />
-          <div className="flex justify-between text-[10px] font-mono text-[#3D3D52] mt-1">
+          <div className="flex justify-between text-[10px] font-mono text-gray-600 mt-1">
             <span>10%</span><span>30%</span><span>60%</span>
           </div>
         </div>
 
         {/* City size */}
         <div>
-          <label htmlFor="population_min" className="block text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono mb-2">
+          <label htmlFor="population_min" className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono mb-2">
             Minimum city size
           </label>
           <select
             id="population_min"
             value={formData.population_min}
             onChange={(e) => setFormData({ ...formData, population_min: parseInt(e.target.value) })}
-            className="w-full px-3 py-3 bg-[#0C0C14] border border-[#1E1E2A] rounded font-mono text-white focus:outline-none focus:border-primary-600 transition-colors cursor-pointer"
+            className="w-full px-3 py-3 bg-white/[0.03] border border-white/10 rounded font-mono text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
           >
-            <option value="0" className="bg-[#111118]">Any size</option>
-            <option value="100000" className="bg-[#111118]">100k+</option>
-            <option value="250000" className="bg-[#111118]">250k+</option>
-            <option value="500000" className="bg-[#111118]">500k+</option>
-            <option value="1000000" className="bg-[#111118]">1M+</option>
+            <option value="0" className="bg-black">Any size</option>
+            <option value="100000" className="bg-black">100k+</option>
+            <option value="250000" className="bg-black">250k+</option>
+            <option value="500000" className="bg-black">500k+</option>
+            <option value="1000000" className="bg-black">1M+</option>
           </select>
         </div>
 
-        {/* QoL weights — collapsible */}
-        <div className="border-t border-[#1E1E2A] pt-4">
+        {/* QoL weights */}
+        <div className="border-t border-white/10 pt-4">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center justify-between w-full text-[10px] uppercase tracking-widest text-[#6B6B7E] font-mono hover:text-white transition-colors"
+            className="flex items-center justify-between w-full text-[10px] uppercase tracking-widest text-gray-400 font-mono hover:text-white transition-colors"
           >
             <span>Quality of life weights</span>
             <svg className={`w-3 h-3 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,14 +396,14 @@ export function FormCard() {
 
           {showAdvanced && (
             <div className="mt-4 space-y-4">
-              <p className="text-[11px] font-mono text-[#6B6B7E]">
+              <p className="text-[11px] font-mono text-gray-500">
                 Set 0–10. Higher = more weight in the final ranking.
               </p>
               {QOL_WEIGHTS.map(({ key, label }) => (
                 <div key={key}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs text-[#6B6B7E]">{label}</label>
-                    <span className="text-xs font-mono text-primary-400">{(formData as any)[key]}</span>
+                    <label className="text-xs text-gray-400">{label}</label>
+                    <span className="text-xs font-mono text-white">{(formData as any)[key]}</span>
                   </div>
                   <input
                     type="range"
@@ -422,7 +422,7 @@ export function FormCard() {
         <button
           type="submit"
           disabled={isSubmitting || Object.keys(errors).length > 0}
-          className={`w-full py-4 bg-primary-400 hover:bg-primary-300 text-[#0C0C14] font-display font-bold text-lg rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isSubmitting ? 'opacity-60' : ''}`}
+          className={`w-full py-4 bg-white hover:bg-gray-200 text-black font-medium text-lg rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${isSubmitting ? 'opacity-60' : ''}`}
         >
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-2">
