@@ -139,41 +139,81 @@ function Reveal({
   );
 }
 
+// 3D animated objects for each feature
+function FloatingBarChart() {
+  return (
+    <div className="scene-3d">
+      <div className="animate-float-rotate">
+        <div className="flex items-end gap-1 h-16">
+          <div className="w-3 bg-gradient-to-t from-white/20 to-white/60 rounded-sm animate-bar-1" />
+          <div className="w-3 bg-gradient-to-t from-white/20 to-white/80 rounded-sm animate-bar-2" />
+          <div className="w-3 bg-gradient-to-t from-white/20 to-white/50 rounded-sm animate-bar-3" />
+          <div className="w-3 bg-gradient-to-t from-white/20 to-white/90 rounded-sm animate-bar-4" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FloatingLayers() {
+  return (
+    <div className="scene-3d">
+      <div className="animate-float-slow relative w-16 h-16">
+        <div className="absolute inset-x-1 top-1 h-3 bg-white/10 rounded border border-white/20 animate-layer-1" />
+        <div className="absolute inset-x-2 top-5 h-3 bg-white/15 rounded border border-white/25 animate-layer-2" />
+        <div className="absolute inset-x-1 top-9 h-3 bg-white/20 rounded border border-white/30 animate-layer-3" />
+        <div className="absolute inset-x-3 top-[52px] h-3 bg-white/25 rounded border border-white/35 animate-layer-4" />
+      </div>
+    </div>
+  );
+}
+
+function FloatingRing() {
+  return (
+    <div className="scene-3d perspective-500">
+      <div className="animate-spin-tilt w-16 h-16 relative">
+        <div className="absolute inset-0 rounded-full border-2 border-white/40" />
+        <div className="absolute inset-2 rounded-full border border-white/20" />
+        <div className="absolute inset-[18px] rounded-full bg-white/10 border border-white/30" />
+        <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
+      </div>
+    </div>
+  );
+}
+
+function FloatingGlobe() {
+  return (
+    <div className="scene-3d perspective-500">
+      <div className="animate-spin-slow w-16 h-16 relative">
+        <div className="absolute inset-0 rounded-full border border-white/30" />
+        <div className="absolute inset-0 rounded-full border border-white/15" style={{ transform: 'rotateY(60deg)' }} />
+        <div className="absolute inset-0 rounded-full border border-white/15" style={{ transform: 'rotateY(120deg)' }} />
+        <div className="absolute top-[30%] inset-x-0 h-[1px] bg-white/20" />
+        <div className="absolute top-[50%] inset-x-0 h-[1px] bg-white/25" />
+        <div className="absolute top-[70%] inset-x-0 h-[1px] bg-white/20" />
+      </div>
+    </div>
+  );
+}
+
 const FEATURES = [
   {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
+    object3d: <FloatingBarChart />,
     title: 'Real market data',
     body: 'Median rent from Zillow, regional price parities from the BEA, and population from the Census Bureau — not estimates.',
   },
   {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>
-    ),
+    object3d: <FloatingLayers />,
     title: 'Transparent breakdown',
     body: "See exactly how your money is split — rent, utilities, groceries, transport — and what's left over each month.",
   },
   {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    object3d: <FloatingRing />,
     title: 'Transportation modes',
     body: 'Car, public transit, or bike/walk — costs and rankings adjust for your actual commute lifestyle.',
   },
   {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    ),
+    object3d: <FloatingGlobe />,
     title: 'Quality of life factors',
     body: 'Weight what matters to you — weather, schools, safety, healthcare, walkability, air quality — to get your own ranking.',
   },
@@ -288,18 +328,20 @@ export default function Home() {
             </Reveal>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {FEATURES.map(({ icon, title, body }, i) => (
+              {FEATURES.map(({ object3d, title, body }, i) => (
                 <Reveal
                   key={title}
                   from={i % 2 === 0 ? 'left' : 'right'}
                   delay={i * 100}
                 >
-                  <div className="bg-white/[0.03] border border-white/10 rounded p-6 group hover:border-white/20 transition-colors h-full">
-                    <div className="inline-flex items-center justify-center w-9 h-9 bg-white/5 border border-white/10 rounded text-white mb-4 group-hover:border-white/20 transition-colors">
-                      {icon}
+                  <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6 group hover:border-white/20 transition-colors h-full flex gap-5 items-start">
+                    <div className="shrink-0">
+                      {object3d}
                     </div>
-                    <h3 className="font-semibold text-white mb-2">{title}</h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">{body}</p>
+                    <div>
+                      <h3 className="font-semibold text-white mb-2">{title}</h3>
+                      <p className="text-sm text-gray-400 leading-relaxed">{body}</p>
+                    </div>
                   </div>
                 </Reveal>
               ))}
@@ -310,34 +352,58 @@ export default function Home() {
         {/* How it works */}
         <div className="border-t border-white/10">
           <div className="container mx-auto px-6 py-20">
-            <div className="max-w-3xl mx-auto">
-              <Reveal from="bottom" className="text-center mb-12">
-                <h2 className="font-semibold text-3xl text-white">How it works</h2>
-              </Reveal>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {STEPS.map(({ n, title, body }, i) => (
-                  <Reveal key={n} from="left" delay={i * 150}>
-                    <div className="text-left">
-                      <div className="font-black text-5xl text-white/[0.06] mb-3 leading-none">{n}</div>
-                      <h4 className="font-semibold text-white mb-2">{title}</h4>
-                      <p className="text-sm text-gray-400">{body}</p>
-                    </div>
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-12 items-center">
+                {/* Left: Text */}
+                <div>
+                  <Reveal from="bottom" className="mb-10">
+                    <h2 className="font-semibold text-3xl md:text-4xl text-white mb-3">How it works</h2>
+                    <p className="text-gray-400">Three steps to find where your money stretches furthest.</p>
                   </Reveal>
-                ))}
-              </div>
 
-              <Reveal from="bottom" delay={300} className="text-center mt-14">
-                <Link
-                  href="/search"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-200 text-black font-medium rounded transition-colors"
-                >
-                  Start ranking
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              </Reveal>
+                  <div className="space-y-8">
+                    {STEPS.map(({ n, title, body }, i) => (
+                      <Reveal key={n} from="left" delay={i * 150}>
+                        <div className="flex gap-5">
+                          <div className="font-black text-4xl text-white/[0.08] leading-none shrink-0">{n}</div>
+                          <div>
+                            <h4 className="font-semibold text-white mb-1">{title}</h4>
+                            <p className="text-sm text-gray-400">{body}</p>
+                          </div>
+                        </div>
+                      </Reveal>
+                    ))}
+                  </div>
+
+                  <Reveal from="bottom" delay={300} className="mt-10">
+                    <Link
+                      href="/search"
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-gray-200 text-black font-medium rounded transition-colors"
+                    >
+                      Start ranking
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  </Reveal>
+                </div>
+
+                {/* Right: Video */}
+                <Reveal from="right" delay={200}>
+                  <div className="rounded-xl overflow-hidden border border-white/10">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-auto"
+                    >
+                      <source src="/vid/demo.mov" type="video/quicktime" />
+                      <source src="/vid/demo.mov" type="video/mp4" />
+                    </video>
+                  </div>
+                </Reveal>
+              </div>
             </div>
           </div>
         </div>
