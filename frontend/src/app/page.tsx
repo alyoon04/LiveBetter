@@ -268,7 +268,7 @@ function FeaturesScrollSection() {
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* Heading */}
         <div
-          className="absolute top-[8vh] left-0 right-0 text-center z-10"
+          className="absolute top-[16vh] left-0 right-0 text-center z-20"
           style={{
             opacity: Math.min(1, progress * 5),
             transform: `translateY(${Math.max(0, (1 - progress * 5)) * 30}px)`,
@@ -281,7 +281,7 @@ function FeaturesScrollSection() {
         </div>
 
         {/* Centered 3D animation */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none pt-[15vh]">
           <div className="w-full max-w-5xl px-6">
             <canvas
               ref={canvasRef}
