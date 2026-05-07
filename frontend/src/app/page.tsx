@@ -139,58 +139,195 @@ function Reveal({
   );
 }
 
-// 3D animated objects for each feature
-function FloatingBarChart() {
+const TOTAL_FRAMES = 240;
+
+// Each card: unique corner position + scroll threshold
+// top-left, top-right, bottom-left, bottom-right
+const CARD_POSITIONS = [
+  { top: '15vh', left: '3vw', right: 'auto', from: 'left' },
+  { top: '15vh', left: 'auto', right: '3vw', from: 'right' },
+  { top: 'auto', bottom: '8vh', left: '3vw', right: 'auto', from: 'left' },
+  { top: 'auto', bottom: '8vh', left: 'auto', right: '3vw', from: 'right' },
+] as const;
+
+const CARD_THRESHOLDS = [0.2, 0.4, 0.6, 0.8];
+
+// Mini 3D animated icons for each feature card
+function MiniBarChart() {
   return (
-    <div className="scene-3d">
-      <div className="animate-float-rotate">
-        <div className="flex items-end gap-1 h-16">
-          <div className="w-3 bg-gradient-to-t from-white/20 to-white/60 rounded-sm animate-bar-1" />
-          <div className="w-3 bg-gradient-to-t from-white/20 to-white/80 rounded-sm animate-bar-2" />
-          <div className="w-3 bg-gradient-to-t from-white/20 to-white/50 rounded-sm animate-bar-3" />
-          <div className="w-3 bg-gradient-to-t from-white/20 to-white/90 rounded-sm animate-bar-4" />
+    <div className="flex items-end gap-[3px] h-5">
+      <div className="w-1 bg-white/60 rounded-sm animate-[miniBar1_2.5s_ease-in-out_infinite]" />
+      <div className="w-1 bg-white/80 rounded-sm animate-[miniBar2_2.5s_ease-in-out_infinite_0.2s]" />
+      <div className="w-1 bg-white/50 rounded-sm animate-[miniBar3_2.5s_ease-in-out_infinite_0.4s]" />
+      <div className="w-1 bg-white/90 rounded-sm animate-[miniBar4_2.5s_ease-in-out_infinite_0.6s]" />
+    </div>
+  );
+}
+
+function MiniLayers() {
+  return (
+    <div className="relative w-5 h-5">
+      <div className="absolute inset-x-0 top-0 h-[3px] bg-white/30 rounded animate-[miniLayer_3s_ease-in-out_infinite]" />
+      <div className="absolute inset-x-0.5 top-[6px] h-[3px] bg-white/45 rounded animate-[miniLayer_3s_ease-in-out_infinite_0.3s]" />
+      <div className="absolute inset-x-0 top-[12px] h-[3px] bg-white/60 rounded animate-[miniLayer_3s_ease-in-out_infinite_0.6s]" />
+      <div className="absolute inset-x-0.5 top-[17px] h-[3px] bg-white/40 rounded animate-[miniLayer_3s_ease-in-out_infinite_0.9s]" />
+    </div>
+  );
+}
+
+function MiniRing() {
+  return (
+    <div className="w-5 h-5 relative animate-[miniSpin_6s_linear_infinite]" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(60deg)' }}>
+      <div className="absolute inset-0 rounded-full border border-white/40" />
+      <div className="absolute inset-1 rounded-full border border-white/20" />
+      <div className="absolute inset-[6px] rounded-full bg-white/15" />
+    </div>
+  );
+}
+
+function MiniGlobe() {
+  return (
+    <div className="w-5 h-5 relative animate-[miniSpin_8s_linear_infinite]" style={{ transformStyle: 'preserve-3d' }}>
+      <div className="absolute inset-0 rounded-full border border-white/30" />
+      <div className="absolute inset-0 rounded-full border border-white/15" style={{ transform: 'rotateY(60deg)' }} />
+      <div className="absolute top-[40%] inset-x-0 h-[1px] bg-white/25" />
+      <div className="absolute top-[60%] inset-x-0 h-[1px] bg-white/20" />
+    </div>
+  );
+}
+
+const MINI_ICONS = [<MiniBarChart />, <MiniLayers />, <MiniRing />, <MiniGlobe />];
+
+function FeaturesScrollSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const frameRef = useRef(0);
+  const [loaded, setLoaded] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const drawFrame = (index: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const img = imagesRef.current[index];
+    if (!img) return;
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    ctx.drawImage(img, 0, 0);
+  };
+
+  useEffect(() => {
+    let loadedCount = 0;
+    const images: HTMLImageElement[] = [];
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      const img = new Image();
+      img.src = `/ani/ezgif-frame-${String(i).padStart(3, '0')}.jpg`;
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === TOTAL_FRAMES) {
+          imagesRef.current = images;
+          setLoaded(true);
+          drawFrame(0);
+        }
+      };
+      images.push(img);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const handleScroll = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const scrollable = el.offsetHeight - window.innerHeight;
+      const scrolled = -rect.top;
+      const p = Math.max(0, Math.min(1, scrolled / scrollable));
+      setProgress(p);
+
+      const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.floor(p * TOTAL_FRAMES));
+      if (frameIndex !== frameRef.current) {
+        frameRef.current = frameIndex;
+        drawFrame(frameIndex);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loaded]);
+
+  const getCardProgress = (i: number) => {
+    const threshold = CARD_THRESHOLDS[i];
+    return Math.max(0, Math.min(1, (progress - threshold) / 0.1));
+  };
+
+  return (
+    <div ref={sectionRef} className="relative" style={{ height: '500vh' }}>
+      <div className="sticky top-0 h-screen overflow-hidden">
+        {/* Heading */}
+        <div
+          className="absolute top-[8vh] left-0 right-0 text-center z-10"
+          style={{
+            opacity: Math.min(1, progress * 5),
+            transform: `translateY(${Math.max(0, (1 - progress * 5)) * 30}px)`,
+          }}
+        >
+          <h2 className="font-semibold text-3xl md:text-4xl text-white mb-3">
+            Why LiveBetter?
+          </h2>
+          <p className="text-gray-400">Data-driven, transparent, personalized.</p>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function FloatingLayers() {
-  return (
-    <div className="scene-3d">
-      <div className="animate-float-slow relative w-16 h-16">
-        <div className="absolute inset-x-1 top-1 h-3 bg-white/10 rounded border border-white/20 animate-layer-1" />
-        <div className="absolute inset-x-2 top-5 h-3 bg-white/15 rounded border border-white/25 animate-layer-2" />
-        <div className="absolute inset-x-1 top-9 h-3 bg-white/20 rounded border border-white/30 animate-layer-3" />
-        <div className="absolute inset-x-3 top-[52px] h-3 bg-white/25 rounded border border-white/35 animate-layer-4" />
-      </div>
-    </div>
-  );
-}
+        {/* Centered 3D animation */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-full max-w-5xl px-6">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-auto"
+              style={{
+                WebkitMaskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%)',
+                maskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%)',
+              }}
+            />
+            {!loaded && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+        </div>
 
-function FloatingRing() {
-  return (
-    <div className="scene-3d perspective-500">
-      <div className="animate-spin-tilt w-16 h-16 relative">
-        <div className="absolute inset-0 rounded-full border-2 border-white/40" />
-        <div className="absolute inset-2 rounded-full border border-white/20" />
-        <div className="absolute inset-[18px] rounded-full bg-white/10 border border-white/30" />
-        <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
-      </div>
-    </div>
-  );
-}
+        {/* Cards — each in its own corner, scroll-driven */}
+        {FEATURES.map(({ title, body }, i) => {
+          const cp = getCardProgress(i);
+          const pos = CARD_POSITIONS[i];
+          const slideX = pos.from === 'left' ? (1 - cp) * -120 : (1 - cp) * 120;
 
-function FloatingGlobe() {
-  return (
-    <div className="scene-3d perspective-500">
-      <div className="animate-spin-slow w-16 h-16 relative">
-        <div className="absolute inset-0 rounded-full border border-white/30" />
-        <div className="absolute inset-0 rounded-full border border-white/15" style={{ transform: 'rotateY(60deg)' }} />
-        <div className="absolute inset-0 rounded-full border border-white/15" style={{ transform: 'rotateY(120deg)' }} />
-        <div className="absolute top-[30%] inset-x-0 h-[1px] bg-white/20" />
-        <div className="absolute top-[50%] inset-x-0 h-[1px] bg-white/25" />
-        <div className="absolute top-[70%] inset-x-0 h-[1px] bg-white/20" />
+          return (
+            <div
+              key={title}
+              className="absolute w-72 lg:w-80 xl:w-96 z-10"
+              style={{
+                top: pos.top,
+                bottom: 'bottom' in pos ? pos.bottom : 'auto',
+                left: pos.left,
+                right: pos.right,
+                opacity: cp,
+                transform: `translateX(${slideX}px)`,
+              }}
+            >
+              <div className="liquid-glass border border-white/10 rounded-xl p-6 hover:border-white/20 transition-colors">
+                <div className="inline-flex items-center justify-center w-9 h-9 bg-white/5 border border-white/10 rounded text-white mb-3 perspective-500">
+                  {MINI_ICONS[i]}
+                </div>
+                <h3 className="font-semibold text-white mb-2">{title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{body}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -198,22 +335,18 @@ function FloatingGlobe() {
 
 const FEATURES = [
   {
-    object3d: <FloatingBarChart />,
     title: 'Real market data',
     body: 'Median rent from Zillow, regional price parities from the BEA, and population from the Census Bureau — not estimates.',
   },
   {
-    object3d: <FloatingLayers />,
     title: 'Transparent breakdown',
     body: "See exactly how your money is split — rent, utilities, groceries, transport — and what's left over each month.",
   },
   {
-    object3d: <FloatingRing />,
     title: 'Transportation modes',
     body: 'Car, public transit, or bike/walk — costs and rankings adjust for your actual commute lifestyle.',
   },
   {
-    object3d: <FloatingGlobe />,
     title: 'Quality of life factors',
     body: 'Weight what matters to you — weather, schools, safety, healthcare, walkability, air quality — to get your own ranking.',
   },
@@ -317,37 +450,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Features */}
-        <div className="container mx-auto px-6 py-20">
-          <div className="max-w-5xl mx-auto">
-            <Reveal from="bottom" className="text-center mb-14">
-              <h2 className="font-semibold text-3xl md:text-4xl text-white mb-3">
-                Why LiveBetter?
-              </h2>
-              <p className="text-gray-400">Data-driven, transparent, personalized.</p>
-            </Reveal>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {FEATURES.map(({ object3d, title, body }, i) => (
-                <Reveal
-                  key={title}
-                  from={i % 2 === 0 ? 'left' : 'right'}
-                  delay={i * 100}
-                >
-                  <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6 group hover:border-white/20 transition-colors h-full flex gap-5 items-start">
-                    <div className="shrink-0">
-                      {object3d}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white mb-2">{title}</h3>
-                      <p className="text-sm text-gray-400 leading-relaxed">{body}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Features — scroll-driven 3D animation with cards */}
+        <FeaturesScrollSection />
 
         {/* How it works */}
         <div className="border-t border-white/10">
